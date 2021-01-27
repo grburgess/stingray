@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Capabilities &#8212; stingray v0.3.dev411+gc10056f</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="_static/astropy_logo.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The basics about Stingray and astrophysics clarified" href="basics.html" />
+    <link rel="prev" title="Stingray: Next-Generation Spectral Timing" href="index.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="index.html"><span id="logotext1">Sting</span><span id="logotext2">ray</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="genindex.html">Index</a></li>
+    <li><a title="Module Index" href="py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="basics.html" title="The basics about Stingray and astrophysics clarified">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="index.html" title="Stingray: Next-Generation Spectral Timing">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="index.html">stingray v0.3.dev411+gc10056f</a>
+	 &#187;
+      </li>
+      
+      <li>Capabilities</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="capabilities">
+<h1>Capabilities<a class="headerlink" href="#capabilities" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="currently-implemented-methods">
+<h2>Currently Implemented Methods<a class="headerlink" href="#currently-implemented-methods" title="Permalink to this headline">¶</a></h2>
+<p>Currently implemented functionality in this library comprises:</p>
+<ul class="simple">
+<li><p>loading event lists from fits files of a few missions (RXTE/PCA, NuSTAR/FPM, XMM-Newton/EPIC)</p></li>
+<li><p>constructing light curves from event data, various operations on light curves (e.g. add, subtract, join, truncate)</p></li>
+<li><p>Good Time Interval operations</p></li>
+<li><p>power spectra in Leahy, rms normalization, absolute rms and no normalization</p></li>
+<li><p>averaged power spectra</p></li>
+<li><p>dynamical power spectra</p></li>
+<li><p>maximum likelihood fitting of periodograms/parametric models</p></li>
+<li><p>(averaged) cross spectra</p></li>
+<li><p>coherence, time lags</p></li>
+<li><p>cross correlation functions</p></li>
+<li><p>r.m.s. spectra and lags (time vs energy, time vs frequency); UNDER DEVELOPMENT</p></li>
+<li><p>covariance spectra; UNDER DEVELOPMENT</p></li>
+<li><p>bispectra; UNDER DEVELOPMENT</p></li>
+<li><p>(Bayesian) quasi-periodic oscillation searches</p></li>
+<li><p>simulating a light curve with a given power spectrum</p></li>
+<li><p>simulating a light curve from another light curve and a 1-d (time) or 2-d (time-energy) impulse response</p></li>
+<li><p>simulating an event list from a given light curve _and_ with a given energy spectrum</p></li>
+<li><p>pulsar searches with Epoch Folding, <span class="math notranslate nohighlight">\(Z^2_n\)</span> test</p></li>
+</ul>
+</div>
+<div class="section" id="future-additions">
+<h2>Future Additions<a class="headerlink" href="#future-additions" title="Permalink to this headline">¶</a></h2>
+<p>We welcome feature requests: if you need a particular tool that’s currently not available or have a new method you think might be usefully implemented in Stingray, please <a class="reference internal" href="help.html"><span class="doc">get in touch</span></a>!</p>
+<p>Other future additions we are currently implementing are:</p>
+<ul class="simple">
+<li><p>bicoherence</p></li>
+<li><p>phase-resolved spectroscopy of quasi-periodic oscillations</p></li>
+<li><p>Fourier-frequency-resolved spectroscopy</p></li>
+<li><p>power colours</p></li>
+<li><p>full HEASARC-compatible mission support</p></li>
+<li><p>pulsar searches with $H$-test</p></li>
+<li><p>binary pulsar searches</p></li>
+</ul>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Capabilities</a><ul>
+<li><a class="reference internal" href="#currently-implemented-methods">Currently Implemented Methods</a></li>
+<li><a class="reference internal" href="#future-additions">Future Additions</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="_sources/scope.rst.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2021, Stingray Developers.<br/>
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.4.3. &nbsp;
+    Last built 27 Jan 2021. <br/>
+  </p>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,320 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The basics about Stingray and astrophysics clarified &#8212; stingray v0.3.dev411+gc10056f</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="_static/astropy_logo.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Downloading and Installing Stingray" href="install.html" />
+    <link rel="prev" title="Capabilities" href="scope.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="index.html"><span id="logotext1">Sting</span><span id="logotext2">ray</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="genindex.html">Index</a></li>
+    <li><a title="Module Index" href="py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="install.html" title="Downloading and Installing Stingray">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="scope.html" title="Capabilities">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="index.html">stingray v0.3.dev411+gc10056f</a>
+	 &#187;
+      </li>
+      
+      <li>The basics about Stingray and astrophysics clarified</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-basics-about-stingray-and-astrophysics-clarified">
+<h1>The basics about Stingray and astrophysics clarified<a class="headerlink" href="#the-basics-about-stingray-and-astrophysics-clarified" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="what-does-stingray-do">
+<h2>1. What does Stingray do?<a class="headerlink" href="#what-does-stingray-do" title="Permalink to this headline">¶</a></h2>
+<p>Stingray is a community-developed spectral-timing software package in Python for astrophysical data. It provides a basis for advanced spectral-timing analysis with a correct statistical framework while also being open-source.</p>
+<p>Stingray provides functionalities such as:</p>
+<ul class="simple">
+<li><p>Constructing light curves from event data and performing various operations on light curves (e.g. add, subtract, join, truncate)</p></li>
+<li><p>Good Time Interval operations</p></li>
+<li><p>Creating periodograms(power spectra) and cross spectra</p></li>
+</ul>
+<p><em>more on this can be found in intro.txt</em></p>
+</div>
+<div class="section" id="so-well-what-does-all-of-this-mean">
+<h2>2. So well what does all of this mean?<a class="headerlink" href="#so-well-what-does-all-of-this-mean" title="Permalink to this headline">¶</a></h2>
+<p>I know, I know all these words are too long and daunting to look at but making them seem easy is the whole reason why this document exists. So let’s start from the basics:</p>
+<div class="section" id="spectral-timing-and-why-is-it-needed">
+<h3>Spectral Timing and why is it needed?<a class="headerlink" href="#spectral-timing-and-why-is-it-needed" title="Permalink to this headline">¶</a></h3>
+<p>Let’s back off a little and first understand what time-series and time-series analysis are:</p>
+<div class="line-block">
+<div class="line">- Time Series: It is a sequence of observations recorded at a succession of time intervals. In general, time series are characterized by the interdependence of its values. The value of the series at some time t is generally not independent of its value at, say, t−1. <a class="footnote-reference brackets" href="#f1" id="id1">1</a></div>
+<div class="line">There is no minimum or maximum amount of time that must be included, allowing the data to be gathered in a way that provides the information being sought by the analyst examining the activity. <a class="footnote-reference brackets" href="#f2" id="id2">2</a></div>
+</div>
+<div class="line-block">
+<div class="line">- Time Series Analysis: It is a statistical technique that deals with gaining insights from periodic or stochastic time-series data.</div>
+</div>
+<p>Now since that’s cleared let’s understand what spectral-timing analysis is:</p>
+<div class="line-block">
+<div class="line">- Spectral-Timing Analysis: Many time series show periodic behaviour. This periodic behaviour can be very complex. Spectral analysis is a technique that allows us to discover underlying periodicities by decomposing the complex signal into simpler parts. To perform spectral analysis, we first must transform data from the time domain to the frequency domain. <a class="footnote-reference brackets" href="#f1" id="id3">1</a></div>
+<div class="line">Hence spectral analysis can be defined as decomposing a stationary time series <em>{xT}</em> into a combination of sinusoids, with a random (and uncorrelated) coefficient essentially analysis in the frequency domain. The covariance of this time series <em>{xT}</em> can be represented by a function known as the spectral density.</div>
+</div>
+</div>
+<div class="section" id="good-time-intervals">
+<h3>Good Time Intervals<a class="headerlink" href="#good-time-intervals" title="Permalink to this headline">¶</a></h3>
+<div class="line-block">
+<div class="line">When observing a stellar object with a satellite, data is accumulated by observing the source with short exposures over time or collecting single photons and measuring their arrival time.</div>
+<div class="line">While recording observations, we might have obstructions from the Earth in the form of increased particle background or any other effect that hinders our ability to observe the source properly.</div>
+<div class="line">There will be times during the observation when everything is working perfectly. Good time intervals (GTIs) are the time intervals where instruments are working well and the source is perfectly visible.</div>
+</div>
+</div>
+<div class="section" id="light-curves">
+<h3>Light Curves<a class="headerlink" href="#light-curves" title="Permalink to this headline">¶</a></h3>
+<div class="line-block">
+<div class="line">Light curves are graphs that show the brightness of an object over a period of time. Images show from the part of an object from where light is emitted. Another piece of information we have about light is the time when it reaches the detector. Astronomers use this “timing” information to create light curves and perform timing analysis. <a class="footnote-reference brackets" href="#f3" id="id4">3</a></div>
+<div class="line">They are simply graphs of brightness (Y-axis) vs. time (X-axis). Brightness increases as you go up the graph and time advances as you move to the right.</div>
+</div>
+<div class="line-block">
+<div class="line">For eg., if we have the following data: <a class="footnote-reference brackets" href="#f3" id="id5">3</a></div>
+</div>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 60%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Date</p></th>
+<th class="head"><p>Brightness (magnitude)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>April 21</p></td>
+<td><p>9.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>April 27</p></td>
+<td><p>9.3</p></td>
+</tr>
+<tr class="row-even"><td><p>May 3</p></td>
+<td><p>9.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>May 9</p></td>
+<td><p>9.9</p></td>
+</tr>
+<tr class="row-even"><td><p>May 15</p></td>
+<td><p>9.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>May 21</p></td>
+<td><p>9.8</p></td>
+</tr>
+<tr class="row-even"><td><p>May 27</p></td>
+<td><p>9.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>June 2</p></td>
+<td><p>9.7</p></td>
+</tr>
+<tr class="row-even"><td><p>June 8</p></td>
+<td><p>9.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>June 14</p></td>
+<td><p>8.8</p></td>
+</tr>
+<tr class="row-even"><td><p>June 20</p></td>
+<td><p>8.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>June 26</p></td>
+<td><p>8.3</p></td>
+</tr>
+<tr class="row-even"><td><p>July 2</p></td>
+<td><p>8.6</p></td>
+</tr>
+<tr class="row-odd"><td><p>July 8</p></td>
+<td><p>9.1</p></td>
+</tr>
+<tr class="row-even"><td><p>July 14</p></td>
+<td><p>9.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>July 20</p></td>
+<td><p>9.2</p></td>
+</tr>
+<tr class="row-even"><td><p>July 26</p></td>
+<td><p>9.5</p></td>
+</tr>
+<tr class="row-odd"><td><p>August 1</p></td>
+<td><p>9.9</p></td>
+</tr>
+<tr class="row-even"><td><p>August 7</p></td>
+<td><p>9.7</p></td>
+</tr>
+<tr class="row-odd"><td><p>August 13</p></td>
+<td><p>9.7</p></td>
+</tr>
+</tbody>
+</table>
+<div class="line-block">
+<div class="line">then we might make a light curve, and it would look like this: <a class="footnote-reference brackets" href="#f3" id="id6">3</a></div>
+</div>
+<img alt="Lightcurve Image" class="align-center" src="https://imagine.gsfc.nasa.gov/Images/science/lightcurve_example.gif" />
+<div class="line-block">
+<div class="line">We can generate similar light curves for studying any part of the light spectrum eg. X-Rays. The study of the light curve, together with other observations, can yield considerable information about the physical process that produces it. The record of changes in brightness that a light curve provides can help astronomers understand processes at work within the object they are studying and identify specific categories (or classes) of stellar events. <a class="footnote-reference brackets" href="#f3" id="id7">3</a></div>
+</div>
+</div>
+<div class="section" id="periodograms-power-spectra-and-cross-spectra">
+<h3>Periodograms, Power spectra and Cross spectra<a class="headerlink" href="#periodograms-power-spectra-and-cross-spectra" title="Permalink to this headline">¶</a></h3>
+<p>Let’s first understand the concept of spectral density which we have mentioned.</p>
+<div class="line-block">
+<div class="line">- Spectral Density/Power Spectra: The power spectrum of a time series {xT} describes the distribution of power into the frequency components composing that signal. Any signal that can be represented as a variable that varies in time has a corresponding frequency spectrum. When these signals are viewed in the form of a frequency spectrum, certain aspects of the received signals or the underlying processes producing them are revealed.</div>
+</div>
+<div class="line-block">
+<div class="line">- Power Spectral Density Function: A Power spectral density function (PSD) shows the strength of the energy variations as a function of frequency. In other words, it shows at which frequencies are variations strong, weak. The unit of PSD is energy (variance) per frequency(width) and one can obtain energy within a specific frequency range by integrating PSD within that frequency range.</div>
+</div>
+<div class="line-block">
+<div class="line">- Periodogram: A periodogram is a brute-force estimate of the spectral density of a signal. The naked eye can be fooled by repeated patterns in light curves, things that seem periodic might not be. In order to look for periodic signals, there are several mathematical tools. A periodogram is one of them. A periodogram calculates the significance of different frequencies in time-series data to identify any intrinsic periodic signals. <a class="footnote-reference brackets" href="#f4" id="id8">4</a></div>
+</div>
+<div class="line-block">
+<div class="line">The statistical significance of each frequency is computed based upon a series of algebraic operations that depend on the particular algorithm used and periodic signal shape assumed. Any time series can be expressed as a combination of cosine (or sine) waves with differing periods (how long it takes to complete a full cycle) and amplitudes (maximum/minimum value during the cycle). This fact can be utilized to examine the important periodic (cyclical) behaviour in a time series. A periodogram is used to identify the dominant periods (or frequencies) of a time series.</div>
+</div>
+<div class="line-block">
+<div class="line">A periodogram is similar to the Fourier Transform but is optimized for unevenly time-sampled data, and for different shapes in periodic signals. Unevenly sampled data is particularly common in astronomy, where your target might rise and set over several nights, or you have to stop observing with your spacecraft to download the data.</div>
+<div class="line">To understand how to calculate a periodogram check this out: <a class="reference external" href="https://online.stat.psu.edu/stat510/lesson/6/6.1#paragraph--356">https://online.stat.psu.edu/stat510/lesson/6/6.1#paragraph–356</a></div>
+</div>
+<div class="line-block">
+<div class="line">- Cross Spectra: Cross spectral analysis allows one to determine the relationship between two time series as a function of frequency. Normally, we wish to compare two time-series along their statistically significant peaks to see if these signals are related to one another at the same frequency and if so, what is the phase relationship between them. Even if two signals look identical we wish to check their periodicity and understand how they are related.</div>
+<div class="line">For further reference check this out: <a class="reference external" href="https://atmos.washington.edu/~dennis/552_Notes_6c.pdf">https://atmos.washington.edu/~dennis/552_Notes_6c.pdf</a></div>
+</div>
+</div>
+</div>
+<div class="section" id="so-how-does-stingray-make-this-easier">
+<h2>3. So, how does Stingray make this easier?<a class="headerlink" href="#so-how-does-stingray-make-this-easier" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Stingray has various methods and classes such as:</div>
+</div>
+<ul class="simple">
+<li><p>lightcurve: Used to generate light curves. It creates a lightcurve object from timestamps and photon count per timestamp. It has various methods such as _add_, _sub_, _neg_, _join_, __truncate__, __split__ to perform operations on the light curve.</p></li>
+<li><p>Crossspectrum: Creates a cross spectra from two light curves. It also has another class <em>AveragedCrosspectrum</em> which is used to analyze long light curves by segmenting and performing FFT on each segment and averaging the resulting cross spectra.</p></li>
+<li><p>Powerspectrum: Creates a power spectra/periodogram from a binned light curve with or without normalization. It also has another class <em>AveragedPowerspectrum</em> which is used to analyze long light curves by segmenting and performing FFT on each segment and averaging the resulting power spectra.</p></li>
+</ul>
+<div class="line-block">
+<div class="line">and many more</div>
+</div>
+<div class="line-block">
+<div class="line">Stingray also provides a CLI <em>HENDRICS</em> and GUI <em>dave</em> interface for providing an abstract analysis interface.</div>
+</div>
+</div>
+<div class="section" id="further-readings">
+<h2>4. Further Readings<a class="headerlink" href="#further-readings" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">If all of this intrigues you as much as it did me, you can go through the references mentioned below and the notebooks(<a class="reference external" href="https://github.com/StingraySoftware/notebooks">https://github.com/StingraySoftware/notebooks</a>) for Stingray or even fork the repository and mess around with the code yourself(<strong>Highly Recommended ;)</strong>)</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<dl class="footnote brackets">
+<dt class="label" id="f1"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id3">2</a>)</span></dt>
+<dd><p><a class="reference external" href="http://web.stanford.edu/class/earthsys214/notes/series.html">http://web.stanford.edu/class/earthsys214/notes/series.html</a></p>
+</dd>
+<dt class="label" id="f2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p><a class="reference external" href="https://www.investopedia.com/terms/t/timeseries.asp">https://www.investopedia.com/terms/t/timeseries.asp</a></p>
+</dd>
+<dt class="label" id="f3"><span class="brackets">3</span><span class="fn-backref">(<a href="#id4">1</a>,<a href="#id5">2</a>,<a href="#id6">3</a>,<a href="#id7">4</a>)</span></dt>
+<dd><p><a class="reference external" href="https://imagine.gsfc.nasa.gov/science/toolbox/timing1.html">https://imagine.gsfc.nasa.gov/science/toolbox/timing1.html</a></p>
+</dd>
+<dt class="label" id="f4"><span class="brackets"><a class="fn-backref" href="#id8">4</a></span></dt>
+<dd><p><a class="reference external" href="http://coolwiki.ipac.caltech.edu/index.php/What_is_a_periodogram">http://coolwiki.ipac.caltech.edu/index.php/What_is_a_periodogram</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">The basics about Stingray and astrophysics clarified</a><ul>
+<li><a class="reference internal" href="#what-does-stingray-do">1. What does Stingray do?</a></li>
+<li><a class="reference internal" href="#so-well-what-does-all-of-this-mean">2. So well what does all of this mean?</a><ul>
+<li><a class="reference internal" href="#spectral-timing-and-why-is-it-needed">Spectral Timing and why is it needed?</a></li>
+<li><a class="reference internal" href="#good-time-intervals">Good Time Intervals</a></li>
+<li><a class="reference internal" href="#light-curves">Light Curves</a></li>
+<li><a class="reference internal" href="#periodograms-power-spectra-and-cross-spectra">Periodograms, Power spectra and Cross spectra</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#so-how-does-stingray-make-this-easier">3. So, how does Stingray make this easier?</a></li>
+<li><a class="reference internal" href="#further-readings">4. Further Readings</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="_sources/basics.rst.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2021, Stingray Developers.<br/>
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.4.3. &nbsp;
+    Last built 27 Jan 2021. <br/>
+  </p>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,1199 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cross Spectra &#8212; stingray v0.3.dev411+gc10056f</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../../_static/astropy_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="CrossCorrelation" href="../CrossCorrelation/cross_correlation_notebook.html" />
+    <link rel="prev" title="Dynamical Power Spectra (on real data)" href="../DynamicalPowerspectrum/DynamicalPowerspectrum_tutorial_%5Breal_data%5D.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../index.html"><span id="logotext1">Sting</span><span id="logotext2">ray</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="../CrossCorrelation/cross_correlation_notebook.html" title="CrossCorrelation">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="../DynamicalPowerspectrum/DynamicalPowerspectrum_tutorial_%5Breal_data%5D.html" title="Dynamical Power Spectra (on real data)">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="../../index.html">stingray v0.3.dev411+gc10056f</a>
+	 &#187;
+      </li>
+      <li><a href="../../core.html" accesskey="U">Core Stingray Functionality</a> &#187;</li>
+      
+      <li>Cross Spectra</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="Cross-Spectra">
+<h1>Cross Spectra<a class="headerlink" href="#Cross-Spectra" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial shows how to make and manipulate a cross spectrum of two light curves using Stingray.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">stingray</span> <span class="kn">import</span> <span class="n">Lightcurve</span><span class="p">,</span> <span class="n">Crossspectrum</span><span class="p">,</span> <span class="n">AveragedCrossspectrum</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.font_manager</span> <span class="k">as</span> <span class="nn">font_manager</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="n">font_prop</span> <span class="o">=</span> <span class="n">font_manager</span><span class="o">.</span><span class="n">FontProperties</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/danielahuppenkothen/work/repositories/stingraysoftware/stingray/stingray/utils.py:21: UserWarning: Numba not installed. Faking it
+  warnings.warn(&#34;Numba not installed. Faking it&#34;)
+</pre></div></div>
+</div>
+<div class="section" id="1.-Create-two-light-curves">
+<h2>1. Create two light curves<a class="headerlink" href="#1.-Create-two-light-curves" title="Permalink to this headline">¶</a></h2>
+<p>There are two ways to make <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code> objects. We’ll show one way here. Check out “Lightcurve/Lightcurve tutorial.ipynb” for more examples.</p>
+<p>Generate an array of relative timestamps that’s 8 seconds long, with dt = 0.03125 s, and make two signals in units of counts. The first is a sine wave with amplitude = 300 cts/s, frequency = 2 Hz, phase offset = 0 radians, and mean = 1000 cts/s. The second is a sine wave with amplitude = 200 cts/s, frequency = 2 Hz, phase offset = pi/4 radians, and mean = 900 cts/s. We then add Poisson noise to the light curves.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">dt</span> <span class="o">=</span> <span class="mf">0.03125</span>  <span class="c1"># seconds</span>
+<span class="n">exposure</span> <span class="o">=</span> <span class="mf">8.</span>  <span class="c1"># seconds</span>
+<span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">exposure</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>  <span class="c1"># seconds</span>
+
+<span class="n">signal_1</span> <span class="o">=</span> <span class="mi">300</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">times</span><span class="o">/</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1000</span>  <span class="c1"># counts/s</span>
+<span class="n">signal_2</span> <span class="o">=</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">times</span><span class="o">/</span><span class="mf">0.5</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">900</span>  <span class="c1"># counts/s</span>
+<span class="n">noisy_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">signal_1</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># counts</span>
+<span class="n">noisy_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">signal_2</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># counts</span>
+</pre></div>
+</div>
+</div>
+<p>Now let’s turn <code class="docutils literal notranslate"><span class="pre">noisy_1</span></code> and <code class="docutils literal notranslate"><span class="pre">noisy_2</span></code> into <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code> objects.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">lc1</span> <span class="o">=</span> <span class="n">Lightcurve</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">noisy_1</span><span class="p">)</span>
+<span class="n">lc2</span> <span class="o">=</span> <span class="n">Lightcurve</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">noisy_2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Here we’re plotting them to see what they look like.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc1</span><span class="o">.</span><span class="n">counts</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lc1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">lc2</span><span class="o">.</span><span class="n">counts</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Counts (cts)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_7_0.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_7_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="2.-Pass-both-of-the-light-curves-to-the-Crossspectrum-class-to-create-a-Crossspectrum-object.">
+<h2>2. Pass both of the light curves to the <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> class to create a <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> object.<a class="headerlink" href="#2.-Pass-both-of-the-light-curves-to-the-Crossspectrum-class-to-create-a-Crossspectrum-object." title="Permalink to this headline">¶</a></h2>
+<p>The first <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code> passed is the channel of interest or interest band, and the second <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code> passed is the reference band. You can also specify the optional attribute <code class="docutils literal notranslate"><span class="pre">norm</span></code> if you wish to normalize the real part of the cross spectrum to squared fractional rms, Leahy, or squared absolute normalization. The default normalization is ‘none’.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">cs</span> <span class="o">=</span> <span class="n">Crossspectrum</span><span class="p">(</span><span class="n">lc1</span><span class="p">,</span> <span class="n">lc2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;stingray.crossspectrum.Crossspectrum object at 0x109779be0&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/danielahuppenkothen/work/repositories/stingraysoftware/stingray/stingray/utils.py:74: UserWarning: SIMON says: Errorbars on cross spectra are not thoroughly tested. Please report any inconsistencies.
+  warnings.warn(&#34;SIMON says: {0}&#34;.format(message), **kwargs)
+</pre></div></div>
+</div>
+<p>We can print the first five values in the arrays of the positive Fourier frequencies and the cross power. The cross power has a real and an imaginary component.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">freq</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[ 0.125  0.25   0.375  0.5    0.625]
+[ 1824.68118955+6010.74895924j -6353.40667544-2232.44448393j
+ -2341.92791487-5291.46491608j  5302.35901464-2806.81031101j
+  5172.60185652-3493.8451835j ]
+</pre></div></div>
+</div>
+<p>Since the negative Fourier frequencies (and their associated cross powers) are discarded, the number of time bins per segment <code class="docutils literal notranslate"><span class="pre">n</span></code> is twice the length of <code class="docutils literal notranslate"><span class="pre">freq</span></code> and <code class="docutils literal notranslate"><span class="pre">power</span></code>.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Size of positive Fourier frequencies: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">freq</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of data points per segment: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">cs</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Size of positive Fourier frequencies: 127
+Number of data points per segment: 256
+</pre></div></div>
+</div>
+</div>
+</div>
+<div class="section" id="Properties">
+<h1>Properties<a class="headerlink" href="#Properties" title="Permalink to this headline">¶</a></h1>
+<p>A <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> object has the following properties :</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">freq</span></code> : Numpy array of mid-bin frequencies that the Fourier transform samples.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">power</span></code> : Numpy array of the cross spectrum (complex numbers).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">df</span></code> : The frequency resolution.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">m</span></code> : The number of cross spectra averaged together. For a <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> of a single segment, <code class="docutils literal notranslate"><span class="pre">m=1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span></code> : The number of data points (time bins) in one segment of the light curves.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nphots1</span></code> : The total number of photons in the first (interest) light curve.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nphots2</span></code> : The total number of photons in the second (reference) light curve.</p></li>
+</ol>
+<p>We can compute the amplitude of the cross spectrum, and plot it as a function of Fourier frequency. Notice how there’s a spike at our signal frequency of 2 Hz!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">cs_amplitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">power</span><span class="p">)</span>  <span class="c1"># The mod square of the real and imaginary components</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">cs_amplitude</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Cross spectral amplitude&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">]:</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_16_0.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_16_0.png" />
+</div>
+</div>
+<p>You’ll notice that the cross spectrum is a bit noisy. This is because we’re only using one segment of data. Let’s try averaging together multiple segments of data. # Averaged cross spectrum example You could use two long <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code>s and have <code class="docutils literal notranslate"><span class="pre">AveragedCrossspectrum</span></code> chop them into specified segments, or give two lists of <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code>s where each segment of <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code> is the same length. We’ll show the first way here. Remember to check the Lightcurve tutorial notebook for fancier
+ways of making light curves. ## 1. Create two long light curves. Generate an array of relative timestamps that’s 1600 seconds long, and two signals in count rate units, with the same properties as the previous example. We then add Poisson noise and turn them into <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code> objects.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">long_dt</span> <span class="o">=</span> <span class="mf">0.03125</span>  <span class="c1"># seconds</span>
+<span class="n">long_exposure</span> <span class="o">=</span> <span class="mf">1600.</span>  <span class="c1"># seconds</span>
+<span class="n">long_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">long_exposure</span><span class="p">,</span> <span class="n">long_dt</span><span class="p">)</span>  <span class="c1"># seconds</span>
+
+<span class="c1"># In count rate units here</span>
+<span class="n">long_signal_1</span> <span class="o">=</span> <span class="mi">300</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">long_times</span><span class="o">/</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1000</span>  <span class="c1"># counts/s</span>
+<span class="n">long_signal_2</span> <span class="o">=</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">long_times</span><span class="o">/</span><span class="mf">0.5</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">900</span>  <span class="c1"># counts/s</span>
+
+<span class="c1"># Multiply by dt to get count units, then add Poisson noise</span>
+<span class="n">long_noisy_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">long_signal_1</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># counts</span>
+<span class="n">long_noisy_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">long_signal_2</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>  <span class="c1"># counts</span>
+
+<span class="n">long_lc1</span> <span class="o">=</span> <span class="n">Lightcurve</span><span class="p">(</span><span class="n">long_times</span><span class="p">,</span> <span class="n">long_noisy_1</span><span class="p">)</span>
+<span class="n">long_lc2</span> <span class="o">=</span> <span class="n">Lightcurve</span><span class="p">(</span><span class="n">long_times</span><span class="p">,</span> <span class="n">long_noisy_2</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">long_lc1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">long_lc1</span><span class="o">.</span><span class="n">counts</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">long_lc1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">long_lc2</span><span class="o">.</span><span class="n">counts</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Counts (cts)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_18_0.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_18_0.png" />
+</div>
+</div>
+<div class="section" id="2.-Pass-both-light-curves-to-the-AveragedCrossspectrum-class-with-a-specified-segment_size.">
+<h2>2. Pass both light curves to the <code class="docutils literal notranslate"><span class="pre">AveragedCrossspectrum</span></code> class with a specified <code class="docutils literal notranslate"><span class="pre">segment_size</span></code>.<a class="headerlink" href="#2.-Pass-both-light-curves-to-the-AveragedCrossspectrum-class-with-a-specified-segment_size." title="Permalink to this headline">¶</a></h2>
+<p>If the exposure (length) of the light curve cannot be divided by <code class="docutils literal notranslate"><span class="pre">segment_size</span></code> with a remainder of zero, the last incomplete segment is thrown out, to avoid signal artefacts. Here we’re using 8 second segments.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">avg_cs</span> <span class="o">=</span> <span class="n">AveragedCrossspectrum</span><span class="p">(</span><span class="n">long_lc1</span><span class="p">,</span> <span class="n">long_lc2</span><span class="p">,</span> <span class="mf">8.</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/danielahuppenkothen/work/repositories/stingraysoftware/stingray/stingray/utils.py:74: UserWarning: SIMON says: Errorbars on cross spectra are not thoroughly tested. Please report any inconsistencies.
+  warnings.warn(&#34;SIMON says: {0}&#34;.format(message), **kwargs)
+</pre></div></div>
+</div>
+<p>Again we can print the first five Fourier frequencies and first five cross spectral values, as well as the number of segments.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="n">avg_cs</span><span class="o">.</span><span class="n">freq</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">avg_cs</span><span class="o">.</span><span class="n">power</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Number of segments: </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[ 0.125  0.25   0.375  0.5    0.625]
+[ 105.15447941-102.47106937j -179.55852266-642.02444467j
+  -92.33657871 +60.11303608j -233.43523331-995.41309285j
+   78.42786218 -35.42395344j]
+
+Number of segments: 200
+</pre></div></div>
+</div>
+<p>If <code class="docutils literal notranslate"><span class="pre">m</span></code> is less than 50 and you try to compute the coherence, a warning will pop up letting you know that your number of segments is significantly low, so the error on <code class="docutils literal notranslate"><span class="pre">coherence</span></code> might not follow the expected (Gaussian) statistical distributions.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">test_cs</span> <span class="o">=</span> <span class="n">AveragedCrossspectrum</span><span class="p">(</span><span class="n">long_lc1</span><span class="p">,</span> <span class="n">long_lc2</span><span class="p">,</span> <span class="mf">40.</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test_cs</span><span class="o">.</span><span class="n">m</span><span class="p">)</span>
+<span class="n">coh</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">test_cs</span><span class="o">.</span><span class="n">coherence</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/danielahuppenkothen/work/repositories/stingraysoftware/stingray/stingray/utils.py:74: UserWarning: SIMON says: Errorbars on cross spectra are not thoroughly tested. Please report any inconsistencies.
+  warnings.warn(&#34;SIMON says: {0}&#34;.format(message), **kwargs)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+40
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/danielahuppenkothen/work/repositories/stingraysoftware/stingray/stingray/utils.py:74: UserWarning: SIMON says: Number of segments used in averaging is significantly low. The result might not follow the expected statistical distributions.
+  warnings.warn(&#34;SIMON says: {0}&#34;.format(message), **kwargs)
+</pre></div></div>
+</div>
+</div>
+</div>
+<div class="section" id="id1">
+<h1>Properties<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>An <code class="docutils literal notranslate"><span class="pre">AveragedCrossspectrum</span></code> object has the following properties, same as <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> :</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">freq</span></code> : Numpy array of mid-bin frequencies that the Fourier transform samples.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">power</span></code> : Numpy array of the averaged cross spectrum (complex numbers).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">df</span></code> : The frequency resolution (in Hz).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">m</span></code> : The number of cross spectra averaged together, equal to the number of whole segments in a light curve.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span></code> : The number of data points (time bins) in one segment of the light curves.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nphots1</span></code> : The total number of photons in the first (interest) light curve.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nphots2</span></code> : The total number of photons in the second (reference) light curve.</p></li>
+</ol>
+<p>Let’s plot the amplitude of the averaged cross spectrum!</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">avg_cs_amplitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">avg_cs</span><span class="o">.</span><span class="n">power</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_cs</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">avg_cs_amplitude</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Cross spectral amplitude&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">]:</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_27_0.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_27_0.png" />
+</div>
+</div>
+<p>Now we’ll show examples of all the things you can do with a <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> or <code class="docutils literal notranslate"><span class="pre">AveragedCrossspectrum</span></code> object using built-in stingray methods.</p>
+</div>
+<div class="section" id="Normalizating-the-cross-spectrum">
+<h1>Normalizating the cross spectrum<a class="headerlink" href="#Normalizating-the-cross-spectrum" title="Permalink to this headline">¶</a></h1>
+<p>The three kinds of normalization are: * <code class="docutils literal notranslate"><span class="pre">leahy</span></code>: Leahy normalization. Makes the Poisson noise level <span class="math notranslate nohighlight">\(= 2\)</span>. See <em>Leahy et al. 1983, ApJ, 266, 160L</em>. * <code class="docutils literal notranslate"><span class="pre">frac</span></code>: Fractional rms-squared normalization, also known as rms normalization. Makes the Poisson noise level <span class="math notranslate nohighlight">\(= 2 / \sqrt(meanrate_1\times meanrate_2)\)</span>. See <em>Belloni &amp; Hasinger 1990, A&amp;A, 227, L33</em>, and <em>Miyamoto et al. 1992, ApJ, 391, L21.</em> * <code class="docutils literal notranslate"><span class="pre">abs</span></code>: Absolute rms-squared normalization, also known as absolute normalization.
+Makes the Poisson noise level <span class="math notranslate nohighlight">\(= 2 \times \sqrt(meanrate_1\times meanrate_2)\)</span>. See <em>insert citation</em>. * <code class="docutils literal notranslate"><span class="pre">none</span></code>: No normalization applied. This is the default.</p>
+<p>Note that these normalizations and the Poisson noise levels apply to the “cross power”, not the cross-spectral amplitude.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">avg_cs_leahy</span> <span class="o">=</span> <span class="n">AveragedCrossspectrum</span><span class="p">(</span><span class="n">long_lc1</span><span class="p">,</span> <span class="n">long_lc2</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;leahy&#39;</span><span class="p">)</span>
+<span class="n">avg_cs_frac</span> <span class="o">=</span> <span class="n">AveragedCrossspectrum</span><span class="p">(</span><span class="n">long_lc1</span><span class="p">,</span> <span class="n">long_lc2</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;frac&#39;</span><span class="p">)</span>
+<span class="n">avg_cs_abs</span> <span class="o">=</span> <span class="n">AveragedCrossspectrum</span><span class="p">(</span><span class="n">long_lc1</span><span class="p">,</span> <span class="n">long_lc2</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="s1">&#39;abs&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/danielahuppenkothen/work/repositories/stingraysoftware/stingray/stingray/utils.py:74: UserWarning: SIMON says: Errorbars on cross spectra are not thoroughly tested. Please report any inconsistencies.
+  warnings.warn(&#34;SIMON says: {0}&#34;.format(message), **kwargs)
+</pre></div></div>
+</div>
+<p>Here we plot the three normalized averaged cross spectra.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="p">[</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">]</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">12</span><span class="p">))</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_cs_leahy</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">avg_cs_leahy</span><span class="o">.</span><span class="n">power</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Leahy cross-power&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Leahy norm.&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+
+<span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_cs_frac</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">avg_cs_frac</span><span class="o">.</span><span class="n">power</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;rms cross-power&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Fractional rms-squared norm.&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+
+<span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_cs_abs</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">avg_cs_abs</span><span class="o">.</span><span class="n">power</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Absolute cross-power&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">ax3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Absolute rms-squared norm.&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">]:</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">ax3</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_31_0.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_31_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="Re-binning-a-cross-spectrum-in-frequency">
+<h1>Re-binning a cross spectrum in frequency<a class="headerlink" href="#Re-binning-a-cross-spectrum-in-frequency" title="Permalink to this headline">¶</a></h1>
+<p>Typically, rebinning is done on an averaged, normalized cross spectrum. ## 1. We can linearly re-bin a cross spectrum (although this is not done much in practice)</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DF before:&quot;</span><span class="p">,</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+<span class="c1"># Both of the following ways are allowed syntax:</span>
+<span class="c1"># lin_rb_cs = Crossspectrum.rebin(avg_cs, 0.25, method=&#39;mean&#39;)</span>
+<span class="n">lin_rb_cs</span> <span class="o">=</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">rebin</span><span class="p">(</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DF after:&quot;</span><span class="p">,</span> <span class="n">lin_rb_cs</span><span class="o">.</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+DF before: 0.125
+DF after: 0.25
+</pre></div></div>
+</div>
+<div class="section" id="2.-And-we-can-logarithmically/geometrically-re-bin-a-cross-spectrum">
+<h2>2. And we can logarithmically/geometrically re-bin a cross spectrum<a class="headerlink" href="#2.-And-we-can-logarithmically/geometrically-re-bin-a-cross-spectrum" title="Permalink to this headline">¶</a></h2>
+<p>In this re-binning, each bin size is 1+f times larger than the previous bin size, where <code class="docutils literal notranslate"><span class="pre">f</span></code> is user-specified and normally in the range 0.01-0.1. The default value is <code class="docutils literal notranslate"><span class="pre">f=0.01</span></code>.</p>
+<p>Logarithmic rebinning only keeps the real part of the cross spectum.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Both of the following ways are allowed syntax:</span>
+<span class="c1"># log_rb_cs, log_rb_freq, binning = Crossspectrum.rebin_log(avg_cs, f=0.02)</span>
+<span class="n">log_rb_cs</span> <span class="o">=</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">rebin_log</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Note that like <code class="docutils literal notranslate"><span class="pre">rebin</span></code>, <code class="docutils literal notranslate"><span class="pre">rebin_log</span></code> returns a <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> or <code class="docutils literal notranslate"><span class="pre">AveragedCrossspectrum</span></code> object (depending on the input object):</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">lin_rb_cs</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;class &#39;stingray.crossspectrum.AveragedCrossspectrum&#39;&gt;
+</pre></div></div>
+</div>
+</div>
+</div>
+<div class="section" id="Time-lags-/-phase-lags">
+<h1>Time lags / phase lags<a class="headerlink" href="#Time-lags-/-phase-lags" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="1.-Frequency-dependent-lags">
+<h2>1. Frequency-dependent lags<a class="headerlink" href="#1.-Frequency-dependent-lags" title="Permalink to this headline">¶</a></h2>
+<p>The lag-frequency spectrum shows the time lag between two light curves (usually non-overlapping broad energy bands) as a function of Fourier frequency. See <em>Uttley et al. 2014, A&amp;ARev, 22, 72</em> section 2.2.1.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">long_dt</span> <span class="o">=</span> <span class="mf">0.03125</span>  <span class="c1"># seconds</span>
+<span class="n">long_exposure</span> <span class="o">=</span> <span class="mf">1600.</span>  <span class="c1"># seconds</span>
+<span class="n">long_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">long_exposure</span><span class="p">,</span> <span class="n">long_dt</span><span class="p">)</span>  <span class="c1"># seconds</span>
+
+<span class="c1"># long_signal_1 = 300 * np.sin(2.*np.pi*long_times/0.5) + 100 * np.sin(2.*np.pi*long_times*5 + np.pi/6) + 1000</span>
+<span class="c1"># long_signal_2 = 200 * np.sin(2.*np.pi*long_times/0.5 + np.pi/4) + 80 * np.sin(2.*np.pi*long_times*5) + 900</span>
+
+<span class="n">long_signal_1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">300</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">long_times</span><span class="o">*</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span>
+<span class="n">long_signal_2</span> <span class="o">=</span> <span class="p">(</span><span class="mi">200</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">long_times</span><span class="o">*</span><span class="mi">3</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">900</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span>
+
+<span class="n">long_lc1</span> <span class="o">=</span> <span class="n">Lightcurve</span><span class="p">(</span><span class="n">long_times</span><span class="p">,</span> <span class="n">long_signal_1</span><span class="p">)</span>
+<span class="n">long_lc2</span> <span class="o">=</span> <span class="n">Lightcurve</span><span class="p">(</span><span class="n">long_times</span><span class="p">,</span> <span class="n">long_signal_2</span><span class="p">)</span>
+
+<span class="n">avg_cs</span> <span class="o">=</span> <span class="n">AveragedCrossspectrum</span><span class="p">(</span><span class="n">long_lc1</span><span class="p">,</span> <span class="n">long_lc2</span><span class="p">,</span> <span class="mf">8.</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">long_lc1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">long_lc1</span><span class="o">.</span><span class="n">counts</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">long_lc1</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">long_lc2</span><span class="o">.</span><span class="n">counts</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (s)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Counts (cts)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">avg_cs</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">power</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/danielahuppenkothen/work/repositories/stingraysoftware/stingray/stingray/utils.py:74: UserWarning: SIMON says: Errorbars on cross spectra are not thoroughly tested. Please report any inconsistencies.
+  warnings.warn(&#34;SIMON says: {0}&#34;.format(message), **kwargs)
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_39_1.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_39_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/opt/local/Library/Frameworks/Python.framework/Versions/3.5/lib/python3.5/site-packages/numpy/core/numeric.py:531: ComplexWarning: Casting complex values to real discards the imaginary part
+  return array(a, dtype, copy=False, order=order)
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_39_3.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_39_3.png" />
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">time_lag</span></code> method returns an <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code> with the time lag in seconds per positive Fourier frequency.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">freq_lags</span><span class="p">,</span> <span class="n">freq_lags_err</span> <span class="o">=</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">time_lag</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+unnorm_power: [  3.51156230e-18 -5.84256529e-18j   2.60183217e-18 -3.93443595e-18j
+   4.08649368e-19 -4.19889793e-19j   2.36261362e-19 -1.57353749e-19j
+   6.02258895e-19 +5.16342834e-19j   3.46071523e-19 +2.39133138e-19j
+   3.88905078e-19 +3.49128137e-19j   3.76555157e-19 -1.04613037e-19j
+   8.57453958e-19 -7.16777928e-19j   4.74163606e-18 +6.22998684e-18j
+   5.55686678e-19 -4.93977389e-19j   1.96285729e-18 -3.29062895e-18j
+   1.35465281e-17 -2.28012208e-17j   7.34083227e-19 -1.04162844e-18j
+   2.70601379e-19 -3.31166964e-19j   2.36659779e-19 -2.79068969e-19j
+   1.38438881e-19 -3.88588884e-20j   2.09097473e-19 +1.22522937e-19j
+   1.40497006e-19 +3.01781468e-20j   2.53759710e-19 +2.83428365e-19j
+   1.42151435e-17 +2.39376102e-17j   2.89479562e-19 +3.55108965e-19j
+   1.99837536e-19 +2.12747336e-19j   9.60000000e+07 -1.66276878e+08j
+   8.71832062e-20 -2.52008051e-20j   6.84840390e-20 -2.14862443e-20j
+   1.07345188e-19 -1.37523646e-19j   6.88536095e-20 -1.14344617e-20j
+   1.57832102e-19 +1.05298764e-19j   9.17950252e-20 -4.24881813e-20j
+   1.66012115e-19 +4.27258685e-20j   1.30027117e-18 +1.51227952e-18j
+   5.00279697e-19 +2.57625930e-19j   6.72832457e-19 -8.03750359e-19j
+   1.29265914e-17 -2.27832436e-17j   2.31334358e-18 -3.00431708e-18j
+   9.76635813e-19 +3.30669917e-20j   5.81726520e-19 -9.36203498e-19j
+   7.88415887e-19 -1.06221780e-18j   3.70700018e-19 -2.72935648e-19j
+   1.90091781e-19 -1.34239411e-19j   1.57104830e-19 -8.10779819e-20j
+   4.15999461e-19 +1.68123908e-19j   9.36589175e-19 +1.07747658e-18j
+   4.03826883e-19 -4.13456354e-19j   2.40768556e-18 -4.05374087e-18j
+   3.71937530e-18 -5.94013540e-18j   4.87589707e-19 -5.57306638e-19j
+   2.83806434e-19 -5.82049357e-20j   3.89471163e-19 +1.43466979e-19j
+   9.38678814e-19 +1.24743600e-18j   2.23041969e-18 +3.77656911e-18j
+   6.92637827e-19 -4.28709692e-19j   2.93570859e-19 -2.88708689e-19j
+   7.29208394e-19 +1.24230061e-19j   2.29538858e-19 -2.52901513e-19j
+   2.80334115e-19 -3.58322764e-19j   4.27406930e-18 -7.13382265e-18j
+   1.97070335e-19 -2.22893692e-19j   1.10498272e-19 -1.03413708e-20j
+   1.39194731e-19 -8.73750345e-20j   9.21053463e-20 -5.07763852e-21j
+   1.99515929e-19 +1.99494842e-19j   1.32718699e-19 +1.01582536e-19j
+   3.50077510e-19 +3.86965968e-19j   9.95095373e-18 +1.65238467e-17j
+   5.72489059e-19 +7.80740130e-19j   2.96319586e-19 -9.89700691e-20j
+   1.37786640e-17 -2.38878851e-17j   3.05178081e-19 -3.68359591e-19j
+   2.42261593e-19 -2.05908439e-19j   1.17616106e-19 -9.65815734e-20j
+   8.01555479e-20 -1.33438480e-20j   1.94292533e-19 +1.97990901e-19j
+   6.89528984e-20 +3.01360432e-20j   7.33355585e-20 -3.86762730e-21j
+   2.25276850e-19 +3.50311664e-21j   1.51700398e-19 +1.26606190e-19j
+   1.45809708e-19 -5.47471092e-20j   1.16906974e-18 -1.61212904e-18j
+   1.20606568e-18 +7.54324248e-19j   3.88117315e-19 +5.50058656e-20j
+   1.56063042e-19 -8.36770346e-20j   3.06934112e-19 -2.49069019e-19j
+   6.15941081e-19 -5.51899503e-19j   1.59087246e-19 +1.25386968e-19j
+   8.38132281e-20 -8.53141653e-21j   1.61531773e-19 -4.02963098e-20j
+   3.80182166e-19 +5.30779147e-19j   9.49269102e-20 -2.09335914e-20j
+   2.65989813e-19 -3.92960759e-19j   8.59370550e-19 -1.25143301e-18j
+   1.35628901e-19 -7.76498659e-20j   1.26499316e-19 -2.31562116e-20j
+   3.15697566e-19 +2.07501418e-19j   2.93905657e-19 +2.78045784e-19j
+   1.30087468e-18 +2.03166513e-18j   3.56389874e-19 -2.35271359e-20j
+   8.17631916e-19 -1.32498365e-18j   2.66631256e-18 -3.23949452e-18j
+   2.56309783e-19 -2.89847628e-19j   1.02399399e-19 -9.41152715e-20j
+   4.32334848e-19 -6.23760411e-19j   7.67444673e-20 -1.33350113e-20j
+   7.54584646e-20 -1.00486173e-20j   8.40135882e-20 -5.64591672e-20j
+   7.37394299e-20 +1.99426657e-20j   4.22454107e-19 +5.70392427e-19j
+   8.81135898e-20 +2.78749443e-21j   2.59074497e-19 +2.87633700e-19j
+   1.52056301e-18 +1.96897478e-18j   2.56570835e-19 +2.21945494e-19j
+   4.78498190e-19 -1.10506973e-19j   9.55112397e-18 -1.66594160e-17j
+   6.06079437e-19 -8.33038601e-19j   2.16824128e-19 -1.64072102e-19j
+   1.64419616e-19 -1.92180213e-19j   1.00688482e-19 +5.88060237e-21j
+   4.27836181e-19 +5.02867773e-19j   9.83835409e-20 +5.14334458e-20j
+   8.08348323e-20 +1.34161082e-20j   2.68025800e-19 -7.74202404e-20j
+   1.86717882e-19 +1.67990114e-19j   9.49143760e-20 +6.78328565e-20j
+   1.71274886e-19 -1.18928604e-19j   3.51008234e-19 +1.63633300e-19j
+   9.38196620e-19 +1.28452493e-18j]
+ph_lag: [-1.02961915 -0.98652014 -0.79896389 -0.58755172  0.70874201  0.60465566
+  0.73155439 -0.27098231 -0.6962732   0.92022969 -0.72667619 -1.03295497
+ -1.03471589 -0.95689239 -0.88570639 -0.86744514 -0.27365163  0.53003265
+  0.21158084  0.84057166  1.03491753  0.88686448  0.816678   -1.04719755
+ -0.28138618 -0.30401497 -0.90802317 -0.16456727  0.58834187 -0.43349612
+  0.25189923  0.86063527  0.47554685 -0.87382968 -1.05471302 -0.91461355
+  0.03384513 -1.01481334 -0.93228297 -0.63465645 -0.61486298 -0.47642529
+  0.38407414  0.85523614 -0.79717991 -1.0348434  -1.01137537 -0.8520208
+ -0.20228183  0.35293975  0.92570572  1.03732159 -0.55423849 -0.77704813
+  0.16874285 -0.83378636 -0.9069101  -1.03101862 -0.84681029 -0.09331672
+ -0.56055143 -0.05507285  0.78534532  0.65328278  0.83540566  1.02874773
+  0.93809222 -0.32234839 -1.04760621 -0.87892992 -0.70446072 -0.68751052
+ -0.16496162  0.79482568  0.41203485 -0.05268996  0.01554902  0.69547384
+ -0.35918229 -0.94337585  0.55891716  0.14078723 -0.49216675 -0.68169817
+ -0.73061543  0.66748258 -0.10144142 -0.24447382  0.94923293 -0.21704935
+ -0.97575182 -0.96904617 -0.51996632 -0.18104956  0.58147534  0.75767586
+  1.00127051 -0.06591952 -1.01790656 -0.8821491  -0.84672808 -0.74326784
+ -0.96470922 -0.1720409  -0.13238862 -0.59170252  0.26412915  0.9333141
+  0.03162469  0.8375892   0.91319955  0.71316427 -0.22696614 -1.0502279
+ -0.94181698 -0.6477791  -0.86308951  0.05833765  0.8658423   0.48170907
+  0.16447017 -0.28119971  0.73264943  0.62050668 -0.60693925  0.43622811
+  0.93996803]
+</pre></div></div>
+</div>
+<p>And this is a plot of the lag-frequency spectrum.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">freq</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">freq</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">avg_cs</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">freq_lags</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">freq_lags_err</span><span class="p">,</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Time lag (s)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_43_0.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_43_0.png" />
+</div>
+</div>
+</div>
+<div class="section" id="2.-Energy-dependent-lags">
+<h2>2. Energy-dependent lags<a class="headerlink" href="#2.-Energy-dependent-lags" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1">## In development</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Coherence">
+<h1>Coherence<a class="headerlink" href="#Coherence" title="Permalink to this headline">¶</a></h1>
+<p>Coherence is a Fourier-frequency-dependent measure of the linear correlation between time series measured simultaneously in two energy channels. See <em>Vaughan and Nowak 1997, ApJ, 474, L43</em> and <em>Uttley et al. 2014, A&amp;ARev, 22, 72</em> section 2.1.3.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">long_dt</span> <span class="o">=</span> <span class="mf">0.03125</span>  <span class="c1"># seconds</span>
+<span class="n">long_exposure</span> <span class="o">=</span> <span class="mf">1600.</span>  <span class="c1"># seconds</span>
+<span class="n">long_times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">long_exposure</span><span class="p">,</span> <span class="n">long_dt</span><span class="p">)</span>  <span class="c1"># seconds</span>
+
+<span class="n">long_signal_1</span> <span class="o">=</span> <span class="mi">300</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">long_times</span><span class="o">/</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1000</span>
+<span class="n">long_signal_2</span> <span class="o">=</span> <span class="mi">200</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">long_times</span><span class="o">/</span><span class="mf">0.5</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mi">900</span>
+
+<span class="n">long_noisy_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">long_signal_1</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>
+<span class="n">long_noisy_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">poisson</span><span class="p">(</span><span class="n">long_signal_2</span><span class="o">*</span><span class="n">dt</span><span class="p">)</span>
+
+<span class="n">long_lc1</span> <span class="o">=</span> <span class="n">Lightcurve</span><span class="p">(</span><span class="n">long_times</span><span class="p">,</span> <span class="n">long_noisy_1</span><span class="p">)</span>
+<span class="n">long_lc2</span> <span class="o">=</span> <span class="n">Lightcurve</span><span class="p">(</span><span class="n">long_times</span><span class="p">,</span> <span class="n">long_noisy_2</span><span class="p">)</span>
+
+<span class="n">avg_cs</span> <span class="o">=</span> <span class="n">AveragedCrossspectrum</span><span class="p">(</span><span class="n">long_lc1</span><span class="p">,</span> <span class="n">long_lc2</span><span class="p">,</span> <span class="mf">8.</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/danielahuppenkothen/work/repositories/stingraysoftware/stingray/stingray/utils.py:74: UserWarning: SIMON says: Errorbars on cross spectra are not thoroughly tested. Please report any inconsistencies.
+  warnings.warn(&#34;SIMON says: {0}&#34;.format(message), **kwargs)
+</pre></div></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">coherence</span></code> method returns two <code class="docutils literal notranslate"><span class="pre">np.ndarray</span></code>s, of the coherence and uncertainty.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">coh</span><span class="p">,</span> <span class="n">err_coh</span> <span class="o">=</span> <span class="n">avg_cs</span><span class="o">.</span><span class="n">coherence</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<p>The coherence and uncertainty have the same length as the positive Fourier frequencies.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coh</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">avg_cs</span><span class="o">.</span><span class="n">freq</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+True
+</pre></div></div>
+</div>
+<p>And we can plot the coherence vs the frequency.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">5</span><span class="p">))</span>
+<span class="c1"># ax.hlines(0, avg_cs.freq[0], avg_cs.freq[-1], color=&#39;black&#39;, linestyle=&#39;dashed&#39;, lw=2)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">avg_cs</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">coh</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">err_coh</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency (Hz)&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Coherence&quot;</span><span class="p">,</span> <span class="n">fontproperties</span><span class="o">=</span><span class="n">font_prop</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">which</span><span class="o">=</span><span class="s1">&#39;minor&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;right&#39;</span><span class="p">]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="n">axis</span><span class="p">]</span><span class="o">.</span><span class="n">set_linewidth</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_53_0.png" src="../../_images/notebooks_Crossspectrum_Crossspectrum_tutorial_53_0.png" />
+</div>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Cross Spectra</a><ul>
+<li><a class="reference internal" href="#1.-Create-two-light-curves">1. Create two light curves</a></li>
+<li><a class="reference internal" href="#2.-Pass-both-of-the-light-curves-to-the-Crossspectrum-class-to-create-a-Crossspectrum-object.">2. Pass both of the light curves to the <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> class to create a <code class="docutils literal notranslate"><span class="pre">Crossspectrum</span></code> object.</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Properties">Properties</a><ul>
+<li><a class="reference internal" href="#2.-Pass-both-light-curves-to-the-AveragedCrossspectrum-class-with-a-specified-segment_size.">2. Pass both light curves to the <code class="docutils literal notranslate"><span class="pre">AveragedCrossspectrum</span></code> class with a specified <code class="docutils literal notranslate"><span class="pre">segment_size</span></code>.</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id1">Properties</a></li>
+<li><a class="reference internal" href="#Normalizating-the-cross-spectrum">Normalizating the cross spectrum</a></li>
+<li><a class="reference internal" href="#Re-binning-a-cross-spectrum-in-frequency">Re-binning a cross spectrum in frequency</a><ul>
+<li><a class="reference internal" href="#2.-And-we-can-logarithmically/geometrically-re-bin-a-cross-spectrum">2. And we can logarithmically/geometrically re-bin a cross spectrum</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Time-lags-/-phase-lags">Time lags / phase lags</a><ul>
+<li><a class="reference internal" href="#1.-Frequency-dependent-lags">1. Frequency-dependent lags</a></li>
+<li><a class="reference internal" href="#2.-Energy-dependent-lags">2. Energy-dependent lags</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Coherence">Coherence</a></li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="../../_sources/notebooks/Crossspectrum/Crossspectrum_tutorial.ipynb.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2021, Stingray Developers.<br/>
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.4.3. &nbsp;
+    Last built 27 Jan 2021. <br/>
+  </p>
+</footer>
+  </body>
+</html>

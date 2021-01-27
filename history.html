@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>History &#8212; stingray v0.3.dev411+gc10056f</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="_static/astropy_logo.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Reporting Bugs and Issues, Getting Help, Providing Feedback" href="help.html" />
+    <link rel="prev" title="Stingray API" href="api.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="index.html"><span id="logotext1">Sting</span><span id="logotext2">ray</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="genindex.html">Index</a></li>
+    <li><a title="Module Index" href="py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="help.html" title="Reporting Bugs and Issues, Getting Help, Providing Feedback">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="api.html" title="Stingray API">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="index.html">stingray v0.3.dev411+gc10056f</a>
+	 &#187;
+      </li>
+      
+      <li>History</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="history">
+<h1>History<a class="headerlink" href="#history" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="unreleased-2021-01-18">
+<h3>Unreleased (2021-01-18)<a class="headerlink" href="#unreleased-2021-01-18" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Lots of performance improvements</p></li>
+<li><p>Fixes in rebin functions</p></li>
+<li><p>New statistical functions for signal detection in power spectra and pulsar search periodograms</p></li>
+<li><p>Improved event and light curve data loading from X-ray satellites (XMM, NICER, NuSTAR, XTE)</p></li>
+<li><p>New implementation of the FFTFIT method to calculate pulsar times of arrival</p></li>
+<li><p>H-test for pulsar searches</p></li>
+<li><p>Z^2_n search adapted to binned and normally distribute pulse profiles</p></li>
+<li><p>Large data processing (e.g. from NICER) allowed</p></li>
+<li><p>Rebinning function now accepts unevenly sampled data</p></li>
+<li><p>New saving and loading from/to Astropy Tables and Timeseries</p></li>
+<li><p>Improved I/O to ascii, hdf5 and other formats</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/StingraySoftware/stingray/compare/v0.2...main">Full list of changes</a></p>
+</div>
+<div class="section" id="v0-2-2020-06-17">
+<h3>v0.2 (2020-06-17)<a class="headerlink" href="#v0-2-2020-06-17" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Added Citation info</p></li>
+<li><p>Fixed various normalization bugs in Powerspectrum</p></li>
+<li><p>Speedup of lightcurve creation and handling</p></li>
+<li><p>Made code compatible with Python 3.8, and dropped support to Python 2.7</p></li>
+<li><p>Test speedups</p></li>
+<li><p>Dead time models and Fourier Amplitude Difference correction</p></li>
+<li><p>Roundtrip of LightCurve to lightkurve objects</p></li>
+<li><p>Fourier-domain accelerated search for pulsars</p></li>
+<li><p>Adapt package to APE-17</p></li>
+<li><p>Periodograms now also accept event lists (instead of just light curves)</p></li>
+<li><p>Allow transparent MJDREF change in event lists and light curves</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/StingraySoftware/stingray/compare/v0.1.3...v0.2&gt;">Full list of changes</a></p>
+</div>
+<div class="section" id="v0-1-3-2019-06-11">
+<h3>v0.1.3 (2019-06-11)<a class="headerlink" href="#v0-1-3-2019-06-11" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Bug fixes</p></li>
+</ul>
+</div>
+<div class="section" id="v0-1-2">
+<h3>v0.1.2<a class="headerlink" href="#v0-1-2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Bug fixes</p></li>
+</ul>
+</div>
+<div class="section" id="v0-1-1">
+<h3>v0.1.1<a class="headerlink" href="#v0-1-1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Bug fixes</p></li>
+</ul>
+</div>
+<div class="section" id="v0-1-2019-05-29">
+<h3>v0.1 (2019-05-29)<a class="headerlink" href="#v0-1-2019-05-29" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Initial release.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="performance-improvements">
+<h2>Performance improvements<a class="headerlink" href="#performance-improvements" title="Permalink to this headline">¶</a></h2>
+<p>Version 0.2 introduced a few performance improvements when <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code> objects are created.
+Once the user defines either the counts per bin or the count rates, the other quantity will be evaluated _lazily_, the first time it is requested.
+Also, we introduce a new <code class="docutils literal notranslate"><span class="pre">low_memory</span></code> option in <code class="docutils literal notranslate"><span class="pre">Lightcurve</span></code>: if selected, and users define e.g. <code class="docutils literal notranslate"><span class="pre">counts</span></code>, <code class="docutils literal notranslate"><span class="pre">countrate</span></code> will be calculated _every_time it is requested, and will not be stored in order to free up RAM.</p>
+</div>
+<div class="section" id="previous-projects-merged-to-stingray">
+<h2>Previous projects merged to Stingray<a class="headerlink" href="#previous-projects-merged-to-stingray" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Daniela Huppenkothen’s original Stingray</p></li>
+<li><p>Matteo Bachetti’s <a class="reference external" href="https://github.com/matteobachetti/MaLTPyNT">MaLTPyNT</a></p></li>
+<li><p>Abigail Stevens’ RXTE power spectra code and phase-resolved spectroscopy code</p></li>
+<li><p>Simone Migliari’s and Paul Balm’s X-ray data exploration GUI commissioned by ESA</p></li>
+</ul>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">History</a><ul>
+<li><a class="reference internal" href="#changelog">Changelog</a><ul>
+<li><a class="reference internal" href="#unreleased-2021-01-18">Unreleased (2021-01-18)</a></li>
+<li><a class="reference internal" href="#v0-2-2020-06-17">v0.2 (2020-06-17)</a></li>
+<li><a class="reference internal" href="#v0-1-3-2019-06-11">v0.1.3 (2019-06-11)</a></li>
+<li><a class="reference internal" href="#v0-1-2">v0.1.2</a></li>
+<li><a class="reference internal" href="#v0-1-1">v0.1.1</a></li>
+<li><a class="reference internal" href="#v0-1-2019-05-29">v0.1 (2019-05-29)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#performance-improvements">Performance improvements</a></li>
+<li><a class="reference internal" href="#previous-projects-merged-to-stingray">Previous projects merged to Stingray</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="_sources/history.rst.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2021, Stingray Developers.<br/>
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.4.3. &nbsp;
+    Last built 27 Jan 2021. <br/>
+  </p>
+</footer>
+  </body>
+</html>

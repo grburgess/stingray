@@ -1,0 +1,1407 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>stingray.io &#8212; stingray v0.3.dev411+gc10056f</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <script type="text/javascript" src="../../_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="../../_static/astropy_logo.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="../../index.html"><span id="logotext1">Sting</span><span id="logotext2">ray</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="../../genindex.html">Index</a></li>
+    <li><a title="Module Index" href="../../py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="../../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li>
+	<a href="../../index.html">stingray v0.3.dev411+gc10056f</a>
+	 &#187;
+      </li>
+      <li><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+      
+       
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for stingray.io</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span>
+<span class="kn">from</span> <span class="nn">astropy.table</span> <span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span> <span class="nn">astropy.logger</span> <span class="kn">import</span> <span class="n">AstropyUserWarning</span>
+
+<span class="kn">import</span> <span class="nn">stingray.utils</span> <span class="k">as</span> <span class="nn">utils</span>
+
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">assign_value_if_none</span><span class="p">,</span> <span class="n">is_string</span><span class="p">,</span> <span class="n">order_list_of_arrays</span>
+<span class="kn">from</span> <span class="nn">.gti</span> <span class="kn">import</span> <span class="n">get_gti_from_all_extensions</span><span class="p">,</span> <span class="n">load_gtis</span>
+
+<span class="c1"># Python 3</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="n">_H5PY_INSTALLED</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">h5py</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">_H5PY_INSTALLED</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="rough_calibration"><a class="viewcode-back" href="../../api.html#stingray.io.rough_calibration">[docs]</a><span class="k">def</span> <span class="nf">rough_calibration</span><span class="p">(</span><span class="n">pis</span><span class="p">,</span> <span class="n">mission</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Make a rough conversion betwenn PI channel and energy.</span>
+
+<span class="sd">    Only works for NICER, NuSTAR, and XMM.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pis: float or array of floats</span>
+<span class="sd">        PI channels in data</span>
+<span class="sd">    mission: str</span>
+<span class="sd">        Mission name</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    energies : float or array of floats</span>
+<span class="sd">        Energy values</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; rough_calibration(0, &#39;nustar&#39;)</span>
+<span class="sd">    1.6</span>
+<span class="sd">    &gt;&gt;&gt; # It&#39;s case-insensitive</span>
+<span class="sd">    &gt;&gt;&gt; rough_calibration(1200, &#39;XMm&#39;)</span>
+<span class="sd">    1.2</span>
+<span class="sd">    &gt;&gt;&gt; rough_calibration(10, &#39;asDf&#39;)</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">    ValueError: Mission asdf not recognized</span>
+<span class="sd">    &gt;&gt;&gt; rough_calibration(100, &#39;nicer&#39;)</span>
+<span class="sd">    1.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mission</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;nustar&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pis</span> <span class="o">*</span> <span class="mf">0.04</span> <span class="o">+</span> <span class="mf">1.6</span>
+    <span class="k">elif</span> <span class="n">mission</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;xmm&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pis</span> <span class="o">*</span> <span class="mf">0.001</span>
+    <span class="k">elif</span> <span class="n">mission</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;nicer&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pis</span> <span class="o">*</span> <span class="mf">0.01</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mission </span><span class="si">{</span><span class="n">mission</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2"> not recognized&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_file_extension"><a class="viewcode-back" href="../../api.html#stingray.io.get_file_extension">[docs]</a><span class="k">def</span> <span class="nf">get_file_extension</span><span class="p">(</span><span class="n">fname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the extension from the file name.</span>
+
+<span class="sd">    If g-zipped, add &#39;.gz&#39; to extension.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; get_file_extension(&#39;ciao.tar&#39;)</span>
+<span class="sd">    &#39;.tar&#39;</span>
+<span class="sd">    &gt;&gt;&gt; get_file_extension(&#39;ciao.tar.gz&#39;)</span>
+<span class="sd">    &#39;.tar.gz&#39;</span>
+<span class="sd">    &gt;&gt;&gt; get_file_extension(&#39;ciao.evt.gz&#39;)</span>
+<span class="sd">    &#39;.evt.gz&#39;</span>
+<span class="sd">    &gt;&gt;&gt; get_file_extension(&#39;ciao.a.tutti.evt.gz&#39;)</span>
+<span class="sd">    &#39;.evt.gz&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fname_root</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.gz&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">fname_root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname_root</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">fname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">fname_root</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="high_precision_keyword_read"><a class="viewcode-back" href="../../api.html#stingray.io.high_precision_keyword_read">[docs]</a><span class="k">def</span> <span class="nf">high_precision_keyword_read</span><span class="p">(</span><span class="n">hdr</span><span class="p">,</span> <span class="n">keyword</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read FITS header keywords, also if split in two.</span>
+
+<span class="sd">    In the case where the keyword is split in two, like</span>
+
+<span class="sd">        MJDREF = MJDREFI + MJDREFF</span>
+
+<span class="sd">    in some missions, this function returns the summed value. Otherwise, the</span>
+<span class="sd">    content of the single keyword</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    hdr : dict_like</span>
+<span class="sd">        The FITS header structure, or a dictionary</span>
+
+<span class="sd">    keyword : str</span>
+<span class="sd">        The key to read in the header</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : long double</span>
+<span class="sd">        The value of the key, or ``None`` if something went wrong</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="n">keyword</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keyword</span><span class="p">)</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">keyword</span> <span class="o">=</span> <span class="n">keyword</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="n">keyword</span> <span class="o">+</span> <span class="s1">&#39;I&#39;</span><span class="p">])</span>
+        <span class="n">value</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="n">keyword</span> <span class="o">+</span> <span class="s1">&#39;F&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_additional_data</span><span class="p">(</span><span class="n">lctable</span><span class="p">,</span> <span class="n">additional_columns</span><span class="p">):</span>
+    <span class="n">additional_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">additional_columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">additional_columns</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">additional_data</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lctable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="s1">&#39;PI&#39;</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Column PI not found. Trying with PHA&#39;</span><span class="p">)</span>
+                    <span class="n">additional_data</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lctable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s1">&#39;PHA&#39;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Column&#39;</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="s1">&#39;not found&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">additional_data</span>
+
+
+<span class="k">def</span> <span class="nf">_get_detector_id</span><span class="p">(</span><span class="n">lctable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Multi-mission detector id finder.</span>
+
+<span class="sd">    Given a FITS table, look for known columns containing detector ID numbers.</span>
+<span class="sd">    This is relevant to a few missions, like XMM, Chandra, XTE.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from astropy.io import fits</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = fits.Column(name=&#39;CCDNR&#39;, array=np.array([1, 2]), format=&#39;K&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; t = fits.TableHDU.from_columns([a])</span>
+<span class="sd">    &gt;&gt;&gt; det_id1 = _get_detector_id(t.data)</span>
+<span class="sd">    &gt;&gt;&gt; a = fits.Column(name=&#39;pcuid&#39;, array=np.array([1, 2]), format=&#39;K&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; t = fits.TableHDU.from_columns([a])</span>
+<span class="sd">    &gt;&gt;&gt; det_id2 = _get_detector_id(t.data)</span>
+<span class="sd">    &gt;&gt;&gt; np.all(det_id1 == det_id2)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; a = fits.Column(name=&#39;asdfasdf&#39;, array=np.array([1, 2]), format=&#39;K&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; t = fits.TableHDU.from_columns([a])</span>
+<span class="sd">    &gt;&gt;&gt; _get_detector_id(t.data) is None</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;CCDNR&quot;</span><span class="p">,</span> <span class="s2">&quot;ccd_id&quot;</span><span class="p">,</span> <span class="s2">&quot;PCUID&quot;</span><span class="p">]:</span>  <span class="c1"># XMM  # Chandra  # XTE</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">lctable</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">column</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lctable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="lcurve_from_fits"><a class="viewcode-back" href="../../api.html#stingray.io.lcurve_from_fits">[docs]</a><span class="k">def</span> <span class="nf">lcurve_from_fits</span><span class="p">(</span>
+    <span class="n">fits_file</span><span class="p">,</span>
+    <span class="n">gtistring</span><span class="o">=</span><span class="s2">&quot;GTI&quot;</span><span class="p">,</span>
+    <span class="n">timecolumn</span><span class="o">=</span><span class="s2">&quot;TIME&quot;</span><span class="p">,</span>
+    <span class="n">ratecolumn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ratehdu</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">fracexp_limit</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+    <span class="n">outfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">noclobber</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">outdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load a lightcurve from a fits file.</span>
+
+<span class="sd">    .. note ::</span>
+<span class="sd">        FITS light curve handling is still under testing.</span>
+<span class="sd">        Absolute times might be incorrect depending on the light curve format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fits_file : str</span>
+<span class="sd">        File name of the input light curve in FITS format</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : dict</span>
+<span class="sd">        Dictionary containing all information needed to create a</span>
+<span class="sd">        :class:`stingray.Lightcurve` object</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    gtistring : str</span>
+<span class="sd">        Name of the GTI extension in the FITS file</span>
+<span class="sd">    timecolumn : str</span>
+<span class="sd">        Name of the column containing times in the FITS file</span>
+<span class="sd">    ratecolumn : str</span>
+<span class="sd">        Name of the column containing rates in the FITS file</span>
+<span class="sd">    ratehdu : str or int</span>
+<span class="sd">        Name or index of the FITS extension containing the light curve</span>
+<span class="sd">    fracexp_limit : float</span>
+<span class="sd">        Minimum exposure fraction allowed</span>
+<span class="sd">    noclobber : bool</span>
+<span class="sd">        If True, do not overwrite existing files</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="sd">&quot;&quot;&quot;WARNING! FITS light curve handling is still under testing.</span>
+<span class="sd">        Absolute times might be incorrect.&quot;&quot;&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># TODO:</span>
+    <span class="c1"># treat consistently TDB, UTC, TAI, etc. This requires some documentation</span>
+    <span class="c1"># reading. For now, we assume TDB</span>
+    <span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pf</span>
+    <span class="kn">from</span> <span class="nn">astropy.time</span> <span class="kn">import</span> <span class="n">Time</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">stingray.gti</span> <span class="kn">import</span> <span class="n">create_gti_from_condition</span>
+
+    <span class="n">lchdulist</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fits_file</span><span class="p">)</span>
+    <span class="n">lctable</span> <span class="o">=</span> <span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="c1"># Units of header keywords</span>
+    <span class="n">tunit</span> <span class="o">=</span> <span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;TIMEUNIT&quot;</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mjdref</span> <span class="o">=</span> <span class="n">high_precision_keyword_read</span><span class="p">(</span>
+            <span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="s2">&quot;MJDREF&quot;</span>
+        <span class="p">)</span>
+        <span class="n">mjdref</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="n">mjdref</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">mjdref</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">instr</span> <span class="o">=</span> <span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;INSTRUME&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">instr</span> <span class="o">=</span> <span class="s2">&quot;EXTERN&quot;</span>
+
+    <span class="c1"># ----------------------------------------------------------------</span>
+    <span class="c1"># Trying to comply with all different formats of fits light curves.</span>
+    <span class="c1"># It&#39;s a madness...</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tstart</span> <span class="o">=</span> <span class="n">high_precision_keyword_read</span><span class="p">(</span>
+            <span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="s2">&quot;TSTART&quot;</span>
+        <span class="p">)</span>
+        <span class="n">tstop</span> <span class="o">=</span> <span class="n">high_precision_keyword_read</span><span class="p">(</span><span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="s2">&quot;TSTOP&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;TSTART and TSTOP need to be specified&quot;</span><span class="p">))</span>
+
+    <span class="c1"># For nulccorr lcs this whould work</span>
+
+    <span class="n">timezero</span> <span class="o">=</span> <span class="n">high_precision_keyword_read</span><span class="p">(</span>
+        <span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="s2">&quot;TIMEZERO&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># Sometimes timezero is &quot;from tstart&quot;, sometimes it&#39;s an absolute time.</span>
+    <span class="c1"># This tries to detect which case is this, and always consider it</span>
+    <span class="c1"># referred to tstart</span>
+    <span class="n">timezero</span> <span class="o">=</span> <span class="n">assign_value_if_none</span><span class="p">(</span><span class="n">timezero</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># for lcurve light curves this should instead work</span>
+    <span class="k">if</span> <span class="n">tunit</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
+        <span class="c1"># TODO:</span>
+        <span class="c1"># Check this. For now, I assume TD (JD - 2440000.5).</span>
+        <span class="c1"># This is likely wrong</span>
+        <span class="n">timezero</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mf">2440000.5</span> <span class="o">+</span> <span class="n">timezero</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">)</span>
+        <span class="n">tstart</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mf">2440000.5</span> <span class="o">+</span> <span class="n">tstart</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">)</span>
+        <span class="n">tstop</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span><span class="mf">2440000.5</span> <span class="o">+</span> <span class="n">tstop</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;jd&quot;</span><span class="p">)</span>
+        <span class="c1"># if None, use NuSTAR defaulf MJDREF</span>
+        <span class="n">mjdref</span> <span class="o">=</span> <span class="n">assign_value_if_none</span><span class="p">(</span>
+            <span class="n">mjdref</span><span class="p">,</span>
+            <span class="n">Time</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="s2">&quot;55197.00076601852&quot;</span><span class="p">),</span> <span class="n">scale</span><span class="o">=</span><span class="s2">&quot;tdb&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">timezero</span> <span class="o">=</span> <span class="p">(</span><span class="n">timezero</span> <span class="o">-</span> <span class="n">mjdref</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">tstart</span> <span class="o">=</span> <span class="p">(</span><span class="n">tstart</span> <span class="o">-</span> <span class="n">mjdref</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">tstop</span> <span class="o">=</span> <span class="p">(</span><span class="n">tstop</span> <span class="o">-</span> <span class="n">mjdref</span><span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="k">if</span> <span class="n">timezero</span> <span class="o">&gt;</span> <span class="n">tstart</span><span class="p">:</span>
+        <span class="n">timezero</span> <span class="o">-=</span> <span class="n">tstart</span>
+
+    <span class="n">time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lctable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">timecolumn</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">tstart</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="n">timezero</span> <span class="o">+</span> <span class="n">tstart</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">time</span> <span class="o">+=</span> <span class="n">timezero</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">high_precision_keyword_read</span><span class="p">(</span><span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="s2">&quot;TIMEDEL&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tunit</span> <span class="o">==</span> <span class="s2">&quot;d&quot;</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">*=</span> <span class="mi">86400</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Assuming that TIMEDEL is the median difference between the&quot;</span>
+            <span class="s2">&quot; light curve times&quot;</span><span class="p">,</span>
+            <span class="n">AstropyUserWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Avoid NaNs</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="n">time</span> <span class="o">==</span> <span class="n">time</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="n">good</span><span class="p">]))</span>
+
+    <span class="c1"># ----------------------------------------------------------------</span>
+    <span class="k">if</span> <span class="n">ratecolumn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;RATE&quot;</span><span class="p">,</span> <span class="s2">&quot;RATE1&quot;</span><span class="p">,</span> <span class="s2">&quot;COUNTS&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">lctable</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+                <span class="n">ratecolumn</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;None of the accepted rate columns were found in the file&quot;</span><span class="p">)</span>
+
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lctable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">ratecolumn</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+
+    <span class="n">errorcolumn</span> <span class="o">=</span> <span class="s2">&quot;ERROR&quot;</span>
+    <span class="k">if</span> <span class="n">ratecolumn</span> <span class="o">==</span> <span class="s2">&quot;RATE1&quot;</span><span class="p">:</span>
+        <span class="n">errorcolumn</span> <span class="o">=</span> <span class="s2">&quot;ERROR1&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rate_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lctable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">errorcolumn</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">rate_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;RATE&quot;</span> <span class="ow">in</span> <span class="n">ratecolumn</span><span class="p">:</span>
+        <span class="n">rate</span> <span class="o">*=</span> <span class="n">dt</span>
+        <span class="n">rate_e</span> <span class="o">*=</span> <span class="n">dt</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">fracexp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lctable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;FRACEXP&quot;</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">fracexp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+
+    <span class="n">good_intervals</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">rate</span> <span class="o">==</span> <span class="n">rate</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">fracexp</span> <span class="o">&gt;=</span> <span class="n">fracexp_limit</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">fracexp</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">rate</span><span class="p">[</span><span class="n">good_intervals</span><span class="p">]</span> <span class="o">/=</span> <span class="n">fracexp</span><span class="p">[</span><span class="n">good_intervals</span><span class="p">]</span>
+    <span class="n">rate_e</span><span class="p">[</span><span class="n">good_intervals</span><span class="p">]</span> <span class="o">/=</span> <span class="n">fracexp</span><span class="p">[</span><span class="n">good_intervals</span><span class="p">]</span>
+
+    <span class="n">rate</span><span class="p">[</span><span class="o">~</span><span class="n">good_intervals</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">gtitable</span> <span class="o">=</span> <span class="n">lchdulist</span><span class="p">[</span><span class="n">gtistring</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">gti_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">gtitable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;START&quot;</span><span class="p">),</span> <span class="n">gtitable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="s2">&quot;STOP&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">gti_list</span> <span class="o">=</span> <span class="n">create_gti_from_condition</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">good_intervals</span><span class="p">)</span>
+
+    <span class="n">lchdulist</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">time</span><span class="p">,</span>
+           <span class="s2">&quot;counts&quot;</span><span class="p">:</span> <span class="n">rate</span><span class="p">,</span>
+           <span class="s2">&quot;err&quot;</span><span class="p">:</span> <span class="n">rate_e</span><span class="p">,</span>
+           <span class="s2">&quot;gti&quot;</span><span class="p">:</span> <span class="n">gti_list</span><span class="p">,</span>
+           <span class="s2">&quot;mjdref&quot;</span><span class="p">:</span> <span class="n">mjdref</span><span class="o">.</span><span class="n">mjd</span><span class="p">,</span>
+           <span class="s2">&quot;dt&quot;</span><span class="p">:</span> <span class="n">dt</span><span class="p">,</span>
+           <span class="s2">&quot;instr&quot;</span><span class="p">:</span> <span class="n">instr</span><span class="p">,</span>
+           <span class="s2">&quot;header&quot;</span><span class="p">:</span> <span class="n">lchdulist</span><span class="p">[</span><span class="n">ratehdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">tostring</span><span class="p">()}</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="load_events_and_gtis"><a class="viewcode-back" href="../../api.html#stingray.io.load_events_and_gtis">[docs]</a><span class="k">def</span> <span class="nf">load_events_and_gtis</span><span class="p">(</span>
+    <span class="n">fits_file</span><span class="p">,</span>
+    <span class="n">additional_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">gtistring</span><span class="o">=</span><span class="s2">&quot;GTI,GTI0,STDGTI&quot;</span><span class="p">,</span>
+    <span class="n">gti_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">hduname</span><span class="o">=</span><span class="s2">&quot;EVENTS&quot;</span><span class="p">,</span>
+    <span class="n">column</span><span class="o">=</span><span class="s2">&quot;TIME&quot;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load event lists and GTIs from one or more files.</span>
+
+<span class="sd">    Loads event list from HDU EVENTS of file fits_file, with Good Time</span>
+<span class="sd">    intervals. Optionally, returns additional columns of data from the same</span>
+<span class="sd">    HDU of the events.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fits_file : str</span>
+
+<span class="sd">    Other parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    additional_columns: list of str, optional</span>
+<span class="sd">        A list of keys corresponding to the additional columns to extract from</span>
+<span class="sd">        the event HDU (ex.: [&#39;PI&#39;, &#39;X&#39;])</span>
+<span class="sd">    gtistring : str</span>
+<span class="sd">        Comma-separated list of accepted GTI extensions (default GTI,STDGTI),</span>
+<span class="sd">        with or without appended integer number denoting the detector</span>
+<span class="sd">    gti_file : str, default None</span>
+<span class="sd">        External GTI file</span>
+<span class="sd">    hduname : str, default &#39;EVENTS&#39;</span>
+<span class="sd">        Name of the HDU containing the event list</span>
+<span class="sd">    return_limits: bool, optional</span>
+<span class="sd">        Return the TSTART and TSTOP keyword values</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    retvals : Object with the following attributes:</span>
+<span class="sd">        ev_list : array-like</span>
+<span class="sd">            Event times in Mission Epoch Time</span>
+<span class="sd">        gti_list: [[gti0_0, gti0_1], [gti1_0, gti1_1], ...]</span>
+<span class="sd">            GTIs in Mission Epoch Time</span>
+<span class="sd">        additional_data: dict</span>
+<span class="sd">            A dictionary, where each key is the one specified in additional_colums.</span>
+<span class="sd">            The data are an array with the values of the specified column in the</span>
+<span class="sd">            fits file.</span>
+<span class="sd">        t_start : float</span>
+<span class="sd">            Start time in Mission Epoch Time</span>
+<span class="sd">        t_stop : float</span>
+<span class="sd">            Stop time in Mission Epoch Time</span>
+<span class="sd">        pi_list : array-like</span>
+<span class="sd">            Raw Instrument energy channels</span>
+<span class="sd">        cal_pi_list : array-like</span>
+<span class="sd">            Calibrated PI channels (those that can be easily converted to energy</span>
+<span class="sd">            values, regardless of the instrument setup.)</span>
+<span class="sd">        energy_list : array-like</span>
+<span class="sd">            Energy of each photon in keV (only for NuSTAR, NICER, XMM)</span>
+<span class="sd">        instr : str</span>
+<span class="sd">            Name of the instrument (e.g. EPIC-pn or FPMA)</span>
+<span class="sd">        mission : str</span>
+<span class="sd">            Name of the instrument (e.g. XMM or NuSTAR)</span>
+<span class="sd">        mjdref : float</span>
+<span class="sd">            MJD reference time for the mission</span>
+<span class="sd">        header : str</span>
+<span class="sd">            Full header of the FITS file, for debugging purposes</span>
+<span class="sd">        detector_id : array-like, int</span>
+<span class="sd">            Detector id for each photon (e.g. each of the CCDs composing XMM&#39;s or</span>
+<span class="sd">            Chandra&#39;s instruments)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">astropy.io</span> <span class="kn">import</span> <span class="n">fits</span> <span class="k">as</span> <span class="n">pf</span>
+
+    <span class="n">gtistring</span> <span class="o">=</span> <span class="n">assign_value_if_none</span><span class="p">(</span><span class="n">gtistring</span><span class="p">,</span> <span class="s2">&quot;GTI,GTI0,STDGTI&quot;</span><span class="p">)</span>
+    <span class="n">lchdulist</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fits_file</span><span class="p">)</span>
+
+    <span class="c1"># Load data table</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lctable</span> <span class="o">=</span> <span class="n">lchdulist</span><span class="p">[</span><span class="n">hduname</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;HDU </span><span class="si">%s</span><span class="s1"> not found. Trying first extension&#39;</span> <span class="o">%</span> <span class="n">hduname</span><span class="p">)</span>
+        <span class="n">lctable</span> <span class="o">=</span> <span class="n">lchdulist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">hduname</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Read event list</span>
+    <span class="n">ev_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lctable</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">column</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">)</span>
+    <span class="n">detector_id</span> <span class="o">=</span> <span class="n">_get_detector_id</span><span class="p">(</span><span class="n">lctable</span><span class="p">)</span>
+    <span class="n">det_number</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">detector_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">detector_id</span><span class="p">))</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">lchdulist</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span>
+    <span class="c1"># Read TIMEZERO keyword and apply it to events</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timezero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;TIMEZERO&quot;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">timezero</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">instr</span> <span class="o">=</span> <span class="n">mission</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+    <span class="k">if</span> <span class="s2">&quot;INSTRUME&quot;</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+        <span class="n">instr</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;INSTRUME&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s2">&quot;TELESCOP&quot;</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+        <span class="n">mission</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="s2">&quot;TELESCOP&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="n">ev_list</span> <span class="o">+=</span> <span class="n">timezero</span>
+
+    <span class="c1"># Read TSTART, TSTOP from header</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">t_start</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;TSTART&quot;</span><span class="p">])</span>
+        <span class="n">t_stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s2">&quot;TSTOP&quot;</span><span class="p">])</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;Tstart and Tstop error. using defaults&quot;</span><span class="p">,</span> <span class="n">AstropyUserWarning</span>
+        <span class="p">)</span>
+        <span class="n">t_start</span> <span class="o">=</span> <span class="n">ev_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">t_stop</span> <span class="o">=</span> <span class="n">ev_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">mjdref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">high_precision_keyword_read</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="s2">&quot;MJDREF&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Read and handle GTI extension</span>
+    <span class="n">accepted_gtistrings</span> <span class="o">=</span> <span class="n">gtistring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">gti_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Select first GTI with accepted name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">gti_list</span> <span class="o">=</span> <span class="n">get_gti_from_all_extensions</span><span class="p">(</span>
+                <span class="n">lchdulist</span><span class="p">,</span>
+                <span class="n">accepted_gtistrings</span><span class="o">=</span><span class="n">accepted_gtistrings</span><span class="p">,</span>
+                <span class="n">det_numbers</span><span class="o">=</span><span class="n">det_number</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;No extensions found with a valid name. &quot;</span>
+                <span class="s2">&quot;Please check the `accepted_gtistrings` values.&quot;</span><span class="p">,</span>
+                <span class="n">AstropyUserWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">gti_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">t_start</span><span class="p">,</span> <span class="n">t_stop</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">gti_list</span> <span class="o">=</span> <span class="n">load_gtis</span><span class="p">(</span><span class="n">gti_file</span><span class="p">,</span> <span class="n">gtistring</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">additional_columns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">additional_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PI&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;PI&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">additional_columns</span><span class="p">:</span>
+        <span class="n">additional_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;PI&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;PHA&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">additional_columns</span> <span class="ow">and</span> <span class="n">mission</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;swift&quot;</span><span class="p">,</span> <span class="s2">&quot;xmm&quot;</span><span class="p">]:</span>
+        <span class="n">additional_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;PHA&quot;</span><span class="p">)</span>
+
+    <span class="n">additional_data</span> <span class="o">=</span> <span class="n">_get_additional_data</span><span class="p">(</span><span class="n">lctable</span><span class="p">,</span> <span class="n">additional_columns</span><span class="p">)</span>
+
+    <span class="n">lchdulist</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Sort event list</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">ev_list</span><span class="p">)</span>
+    <span class="n">ev_list</span> <span class="o">=</span> <span class="n">ev_list</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">detector_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">detector_id</span> <span class="o">=</span> <span class="n">detector_id</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+
+    <span class="n">additional_data</span> <span class="o">=</span> <span class="n">order_list_of_arrays</span><span class="p">(</span><span class="n">additional_data</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;PI&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">cal_pi</span> <span class="o">=</span> <span class="n">pi</span>
+
+    <span class="k">if</span> <span class="n">mission</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;xmm&quot;</span><span class="p">,</span> <span class="s2">&quot;swift&quot;</span><span class="p">]:</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;PHA&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">cal_pi</span> <span class="o">=</span> <span class="n">additional_data</span><span class="p">[</span><span class="s2">&quot;PI&quot;</span><span class="p">]</span>
+        <span class="c1"># additional_data.pop(&quot;PHA&quot;)</span>
+
+    <span class="c1"># additional_data.pop(&quot;PI&quot;)</span>
+    <span class="c1"># EventReadOutput() is an empty class. We will assign a number of attributes to</span>
+    <span class="c1"># it, like the arrival times of photons, the energies, and some information</span>
+    <span class="c1"># from the header.</span>
+    <span class="n">returns</span> <span class="o">=</span> <span class="n">EventReadOutput</span><span class="p">()</span>
+
+    <span class="n">returns</span><span class="o">.</span><span class="n">ev_list</span> <span class="o">=</span> <span class="n">ev_list</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">gti_list</span> <span class="o">=</span> <span class="n">gti_list</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">pi_list</span> <span class="o">=</span> <span class="n">pi</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">cal_pi_list</span> <span class="o">=</span> <span class="n">cal_pi</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">returns</span><span class="o">.</span><span class="n">energy_list</span> <span class="o">=</span> <span class="n">rough_calibration</span><span class="p">(</span><span class="n">cal_pi</span><span class="p">,</span> <span class="n">mission</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">returns</span><span class="o">.</span><span class="n">energy_list</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">instr</span> <span class="o">=</span> <span class="n">instr</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">mission</span> <span class="o">=</span> <span class="n">mission</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">mjdref</span> <span class="o">=</span> <span class="n">mjdref</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">tostring</span><span class="p">()</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">additional_data</span> <span class="o">=</span> <span class="n">additional_data</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">t_start</span> <span class="o">=</span> <span class="n">t_start</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">t_stop</span> <span class="o">=</span> <span class="n">t_stop</span>
+    <span class="n">returns</span><span class="o">.</span><span class="n">detector_id</span> <span class="o">=</span> <span class="n">detector_id</span>
+
+    <span class="k">return</span> <span class="n">returns</span></div>
+
+
+<span class="k">class</span> <span class="nc">EventReadOutput</span><span class="p">():</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="mkdir_p"><a class="viewcode-back" href="../../api.html#stingray.io.mkdir_p">[docs]</a><span class="k">def</span> <span class="nf">mkdir_p</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="sd">&quot;&quot;&quot;Safe ``mkdir`` function, found at [so-mkdir]_.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path : str</span>
+<span class="sd">        The absolute path to the directory to be created</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    .. [so-mkdir] http://stackoverflow.com/questions/600268/mkdir-p-functionality-in-python</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">errno</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># Python &gt;2.5</span>
+        <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span></div>
+
+
+<div class="viewcode-block" id="read_header_key"><a class="viewcode-back" href="../../api.html#stingray.io.read_header_key">[docs]</a><span class="k">def</span> <span class="nf">read_header_key</span><span class="p">(</span><span class="n">fits_file</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">hdu</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read the header key key from HDU hdu of the file ``fits_file``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fits_file: str</span>
+<span class="sd">        The file name and absolute path to the event file.</span>
+
+<span class="sd">    key: str</span>
+<span class="sd">        The keyword to be read</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    hdu : int</span>
+<span class="sd">        Index of the HDU extension from which the header key to be read.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    value : object</span>
+<span class="sd">        The value stored under ``key`` in ``fits_file``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">hdulist</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fits_file</span><span class="p">,</span> <span class="n">ignore_missing_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">hdulist</span><span class="p">[</span><span class="n">hdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">hdulist</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="ref_mjd"><a class="viewcode-back" href="../../api.html#stingray.io.ref_mjd">[docs]</a><span class="k">def</span> <span class="nf">ref_mjd</span><span class="p">(</span><span class="n">fits_file</span><span class="p">,</span> <span class="n">hdu</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read ``MJDREFF``, ``MJDREFI`` or, if failed, ``MJDREF``, from the FITS header.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fits_file : str</span>
+<span class="sd">        The file name and absolute path to the event file.</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    hdu : int</span>
+<span class="sd">        Index of the HDU extension from which the header key to be read.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mjdref : numpy.longdouble</span>
+<span class="sd">        the reference MJD</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fits_file</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span>\
+            <span class="ow">not</span> <span class="n">is_string</span><span class="p">(</span><span class="n">fits_file</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">fits_file</span> <span class="o">=</span> <span class="n">fits_file</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;opening </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fits_file</span><span class="p">)</span>
+
+    <span class="n">hdulist</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">fits_file</span><span class="p">,</span> <span class="n">ignore_missing_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">ref_mjd_val</span> <span class="o">=</span> <span class="n">high_precision_keyword_read</span><span class="p">(</span><span class="n">hdulist</span><span class="p">[</span><span class="n">hdu</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">,</span> <span class="s2">&quot;MJDREF&quot;</span><span class="p">)</span>
+
+    <span class="n">hdulist</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ref_mjd_val</span></div>
+
+
+<div class="viewcode-block" id="common_name"><a class="viewcode-back" href="../../api.html#stingray.io.common_name">[docs]</a><span class="k">def</span> <span class="nf">common_name</span><span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;common&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Strip two strings of the letters not in common.</span>
+
+<span class="sd">    Filenames must be of same length and only differ by a few letters.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    str1 : str</span>
+<span class="sd">    str2 : str</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    default : str</span>
+<span class="sd">        The string to return if ``common_str`` is empty</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    common_str : str</span>
+<span class="sd">        A string containing the parts of the two names in common</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">str1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">str2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="n">common_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="c1"># Extract the MP root of the name (in case they&#39;re event files)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">letter</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">str1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">str2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">letter</span><span class="p">:</span>
+            <span class="n">common_str</span> <span class="o">+=</span> <span class="n">letter</span>
+    <span class="c1"># Remove leading and trailing underscores and dashes</span>
+    <span class="n">common_str</span> <span class="o">=</span> <span class="n">common_str</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+    <span class="n">common_str</span> <span class="o">=</span> <span class="n">common_str</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">common_str</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">common_str</span> <span class="o">=</span> <span class="n">default</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;common_name: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> -&gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span><span class="p">,</span> <span class="n">common_str</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">common_str</span></div>
+
+
+<div class="viewcode-block" id="split_numbers"><a class="viewcode-back" href="../../api.html#stingray.io.split_numbers">[docs]</a><span class="k">def</span> <span class="nf">split_numbers</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Split high precision number(s) into doubles.</span>
+
+<span class="sd">    You can specify the number of shifts to move the decimal point.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    number: long double</span>
+<span class="sd">        The input high precision number which is to be split</span>
+
+<span class="sd">    Other parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    shift: integer</span>
+<span class="sd">        Move the cut by `shift` decimal points to the right (left if negative)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    number_I: double</span>
+<span class="sd">        First part of high precision number</span>
+
+<span class="sd">    number_F: double</span>
+<span class="sd">        Second part of high precision number</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; n = 12.34</span>
+<span class="sd">    &gt;&gt;&gt; i, f = split_numbers(n)</span>
+<span class="sd">    &gt;&gt;&gt; i == 12</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; np.isclose(f, 0.34)</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; split_numbers(n, 2)</span>
+<span class="sd">    (12.34, 0.0)</span>
+<span class="sd">    &gt;&gt;&gt; split_numbers(n, -1)</span>
+<span class="sd">    (10.0, 2.34)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+        <span class="n">number</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+        <span class="n">number</span> <span class="o">*=</span> <span class="mi">10</span><span class="o">**</span><span class="n">shift</span>
+        <span class="n">mods</span> <span class="o">=</span> <span class="p">[</span><span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">number</span><span class="p">]</span>
+        <span class="n">number_F</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">mods</span><span class="p">]</span>
+        <span class="n">number_I</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">mods</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">number</span> <span class="o">*=</span> <span class="mi">10</span><span class="o">**</span><span class="n">shift</span>
+        <span class="n">number_F</span><span class="p">,</span> <span class="n">number_I</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">modf</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">number_I</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="o">**</span><span class="n">shift</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">(</span><span class="n">number_F</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="o">**</span><span class="n">shift</span></div>
+
+
+<span class="k">def</span> <span class="nf">_save_pickle_object</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save a class object in pickle format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    object: class instance</span>
+<span class="sd">        A class object whose attributes are saved in a</span>
+<span class="sd">        dictionary format</span>
+
+<span class="sd">    filename: str</span>
+<span class="sd">        Name of the file in which object is saved</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_retrieve_pickle_object</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a pickled class object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: str</span>
+<span class="sd">        Name of the file in which object is saved</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data: class object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_save_hdf5_object</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save a class object in hdf5 format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    object: class instance</span>
+<span class="sd">        A class object whose attributes are saved in a</span>
+<span class="sd">        dictionary format</span>
+
+<span class="sd">    filename: str</span>
+<span class="sd">        Name of the file in which object is saved</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">items</span> <span class="k">if</span> <span class="n">items</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+            <span class="c1"># If data is a single number, store as an attribute.</span>
+            <span class="k">if</span> <span class="n">_isattribute</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">):</span>
+                    <span class="n">data_I</span><span class="p">,</span> <span class="n">data_F</span> <span class="o">=</span> <span class="n">split_numbers</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">,</span> <span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">]</span>
+                    <span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_I</span>
+                    <span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_F</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+            <span class="c1"># If data is an array or list, create a dataset.</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">):</span>
+                        <span class="n">data_I</span><span class="p">,</span> <span class="n">data_F</span> <span class="o">=</span> <span class="n">split_numbers</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">,</span> <span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">]</span>
+                        <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="n">data_I</span><span class="p">)</span>
+                        <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="n">data_F</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">hf</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="c1"># To account for numpy arrays of type &#39;None&#39; (0-d)</span>
+                    <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">_retrieve_hdf5_object</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves an hdf5 format class object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: str</span>
+<span class="sd">        The name of file with which object was saved</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data: dictionary</span>
+<span class="sd">        Loads the data from an hdf5 object file and returns</span>
+<span class="sd">        in dictionary format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+        <span class="n">dset_keys</span> <span class="o">=</span> <span class="n">hf</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">attr_keys</span> <span class="o">=</span> <span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">dset_copy</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dset_keys</span><span class="p">)[:]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dset_keys</span><span class="p">:</span>
+
+            <span class="c1"># Make sure key hasn&#39;t been removed</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dset_copy</span><span class="p">:</span>
+                <span class="c1"># Longdouble case</span>
+                <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;_I&#39;</span><span class="p">,</span> <span class="s1">&#39;_F&#39;</span><span class="p">]:</span>
+                    <span class="n">m_key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="c1"># Add integer and float parts</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">m_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hf</span><span class="p">[</span><span class="n">m_key</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">][()])</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">m_key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hf</span><span class="p">[</span><span class="n">m_key</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">][()])</span>
+                    <span class="c1"># Remove integer and float parts from attributes</span>
+                    <span class="n">dset_copy</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">m_key</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">)</span>
+                    <span class="n">dset_copy</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">m_key</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="n">key</span><span class="p">][()]</span>
+
+        <span class="n">attr_copy</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attr_keys</span><span class="p">)[:]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attr_keys</span><span class="p">:</span>
+
+            <span class="c1"># Make sure key hasn&#39;t been removed</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attr_copy</span><span class="p">:</span>
+                <span class="c1"># Longdouble case</span>
+                <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;_I&#39;</span><span class="p">,</span> <span class="s1">&#39;_F&#39;</span><span class="p">]:</span>
+                    <span class="n">m_key</span> <span class="o">=</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="c1"># Add integer and float parts</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">m_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">m_key</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">])</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">m_key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">m_key</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">])</span>
+                    <span class="c1"># Remove integer and float parts from attributes</span>
+                    <span class="n">attr_copy</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">m_key</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">)</span>
+                    <span class="n">attr_copy</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">m_key</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">hf</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_save_ascii_object</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.18e</span><span class="s2">&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save an array to a text file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    object : numpy.ndarray</span>
+<span class="sd">        An array with the data to be saved</span>
+
+<span class="sd">    filename : str</span>
+<span class="sd">        The file name to save to</span>
+
+<span class="sd">    fmt : str or sequence of strs, optional</span>
+<span class="sd">        Use for formatting of columns. See `numpy.savetxt` documentation</span>
+<span class="sd">        for details.</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    kwargs : any keyword argument taken by `numpy.savetxt`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Formatting of columns not recognized! Use &#39;fmt&#39; &quot;</span>
+                        <span class="s2">&quot;to format columns including strings or mixed types!&quot;</span><span class="p">)</span>
+
+    <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">_retrieve_ascii_object</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper function to retrieve ascii objects from file.</span>
+<span class="sd">    Uses astropy.Table for reading and storing the data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        The name of the file with the data to be retrieved.</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    -----------------------------</span>
+<span class="sd">    usecols : {int | iterable}</span>
+<span class="sd">        The indices of the columns in the file to be returned.</span>
+<span class="sd">        By default, all columns will be returned</span>
+
+<span class="sd">    skiprows : int</span>
+<span class="sd">        The number of rows at the beginning to skip</span>
+<span class="sd">        By default, no rows will be skipped.</span>
+
+<span class="sd">    names : iterable</span>
+<span class="sd">        A list of column names to be attached to the columns.</span>
+<span class="sd">        By default, no column names are added, unless they are specified</span>
+<span class="sd">        in the file header and can be read by astropy.Table.read</span>
+<span class="sd">        automatically.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : astropy.Table object</span>
+<span class="sd">        An astropy.Table object with the data from the file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;filename must be string!&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;usecols&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;usecols&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Need to define two columns&quot;</span><span class="p">)</span>
+        <span class="n">usecols</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;usecols&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">usecols</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="s1">&#39;skiprows&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;skiprows&quot;</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="n">skiprows</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;skiprows&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">skiprows</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="s2">&quot;names&quot;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">data_start</span><span class="o">=</span><span class="n">skiprows</span><span class="p">,</span>
+                      <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">usecols</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">colnames</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">colnames</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">colnames</span><span class="p">[</span><span class="n">usecols</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">cols</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_save_fits_object</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save a class object in fits format.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    object: class instance</span>
+<span class="sd">        A class object whose attributes would be saved in a dictionary format.</span>
+
+<span class="sd">    filename: str</span>
+<span class="sd">        The file name to save to</span>
+
+<span class="sd">    Additional Keyword Parameters</span>
+<span class="sd">    -----------------------------</span>
+<span class="sd">    tnames: str iterable</span>
+<span class="sd">        The names of HDU tables. For instance, in case of eventlist,</span>
+<span class="sd">        tnames could be [&#39;EVENTS&#39;, &#39;GTI&#39;]</span>
+
+<span class="sd">    colsassign: dictionary iterable</span>
+<span class="sd">        This indicates the correct tables to which to assign columns</span>
+<span class="sd">        to. If this is None or if a column is not provided, it/they will</span>
+<span class="sd">        be assigned to the first table.</span>
+
+<span class="sd">        For example, [{&#39;gti&#39;:&#39;GTI&#39;}] indicates that gti values should be</span>
+<span class="sd">        stored in GTI table.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tables</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="s1">&#39;colsassign&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">colsassign</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;colsassign&#39;</span><span class="p">]</span>
+        <span class="n">iscolsassigned</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">iscolsassigned</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="s1">&#39;tnames&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">tables</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tnames&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tables</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MAIN&#39;</span><span class="p">]</span>
+
+    <span class="n">items</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">items</span> <span class="k">if</span> <span class="n">items</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">cols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">hdrs</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">:</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="n">hdrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fits</span><span class="o">.</span><span class="n">Header</span><span class="p">())</span>
+
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">items</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span>
+
+        <span class="c1"># Get the index of table to which column belongs</span>
+        <span class="k">if</span> <span class="n">iscolsassigned</span> <span class="ow">and</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">colsassign</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">tables</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">colsassign</span><span class="p">[</span><span class="n">attr</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># If data is a single number, store as metadata</span>
+        <span class="k">if</span> <span class="n">_isattribute</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">):</span>
+                <span class="c1"># Longdouble case. Split and save integer and float parts</span>
+                <span class="n">data_I</span><span class="p">,</span> <span class="n">data_F</span> <span class="o">=</span> <span class="n">split_numbers</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">,</span> <span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">]</span>
+                <span class="n">hdrs</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_I</span>
+                <span class="n">hdrs</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data_F</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Normal case. Save as it is</span>
+                <span class="n">hdrs</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="c1"># If data is an array or list, insert as table column</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">):</span>
+                    <span class="c1"># Longdouble case. Split and save integer and float parts</span>
+                    <span class="n">data_I</span><span class="p">,</span> <span class="n">data_F</span> <span class="o">=</span> <span class="n">split_numbers</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">,</span> <span class="n">attr</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">]</span>
+                    <span class="n">cols</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">fits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">,</span>
+                                    <span class="n">array</span><span class="o">=</span><span class="n">data_I</span><span class="p">))</span>
+                    <span class="n">cols</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">fits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                    <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">,</span>
+                                    <span class="n">array</span><span class="o">=</span><span class="n">data_F</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Normal case. Save as it is</span>
+                    <span class="n">cols</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">fits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">attr</span><span class="p">,</span>
+                                    <span class="nb">format</span><span class="o">=</span><span class="n">_lookup_format</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                    <span class="n">array</span><span class="o">=</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="c1"># To account for numpy arrays of type &#39;None&#39; (0-d)</span>
+                <span class="k">pass</span>
+
+    <span class="n">tbhdu</span> <span class="o">=</span> <span class="n">fits</span><span class="o">.</span><span class="n">HDUList</span><span class="p">()</span>
+
+    <span class="c1"># Create binary tables</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">tbhdu</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                       <span class="n">header</span><span class="o">=</span><span class="n">hdrs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                                       <span class="n">name</span><span class="o">=</span><span class="n">tables</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+    <span class="n">tbhdu</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_retrieve_fits_object</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieves a fits format class object.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: str</span>
+<span class="sd">        The name of file with which object was saved</span>
+
+<span class="sd">    Other Parameters</span>
+<span class="sd">    ----------------</span>
+<span class="sd">    cols: str iterable</span>
+<span class="sd">        The names of columns to extract from fits tables.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data: dictionary</span>
+<span class="sd">        Loads the data from a fits object file and returns</span>
+<span class="sd">        in dictionary format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">if</span> <span class="s1">&#39;cols&#39;</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cols&#39;</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">with</span> <span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">memmap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_missing_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdulist</span><span class="p">:</span>
+        <span class="n">fits_cols</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Get columns from all tables</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">hdulist</span><span class="p">)):</span>
+            <span class="n">fits_cols</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hdulist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">names</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fits_cols</span><span class="p">)):</span>
+                <span class="c1"># .upper() is used because `fits` stores values in upper case</span>
+                <span class="n">hdr_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hdulist</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+
+                <span class="c1"># Longdouble case. Check for columns</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span> <span class="ow">in</span> <span class="n">fits_cols</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span> <span class="ow">in</span> <span class="n">fits_cols</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hdulist</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">])</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hdulist</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">])</span>
+
+                <span class="c1"># Longdouble case. Check for header keys</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span> <span class="ow">in</span> <span class="n">hdr_keys</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span> <span class="ow">in</span> <span class="n">hdr_keys</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> \
+                            <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hdulist</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_I&#39;</span><span class="p">])</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> \
+                            <span class="n">np</span><span class="o">.</span><span class="n">longdouble</span><span class="p">(</span><span class="n">hdulist</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">c</span> <span class="o">+</span> <span class="s1">&#39;_F&#39;</span><span class="p">])</span>
+
+                <span class="c1"># Normal case. Check for columns</span>
+                <span class="k">elif</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">fits_cols</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdulist</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+
+                <span class="c1"># Normal case. Check for header keys</span>
+                <span class="k">elif</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">hdr_keys</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdulist</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+        <span class="n">hdulist</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span> <span class="nf">_lookup_format</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Looks up relevant format in fits.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    var : object</span>
+<span class="sd">        An object to look up in the table</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lookup : str</span>
+<span class="sd">        The str describing the type of ``var``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lookup</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;&lt;type &#39;int&#39;&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;J&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;type &#39;float&#39;&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;E&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;&lt;type &#39;numpy.int64&#39;&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;K&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;type &#39;numpy.float64&#39;&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;&lt;type &#39;numpy.float128&#39;&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;type &#39;str&#39;&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;30A&quot;</span><span class="p">,</span>
+              <span class="s2">&quot;&lt;type &#39;bool&#39;&quot;</span><span class="p">:</span> <span class="s2">&quot;L&quot;</span><span class="p">}</span>
+
+    <span class="n">form</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">lookup</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">form</span><span class="p">)]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="c1"># If an entry is not contained in lookup dictionary</span>
+        <span class="k">return</span> <span class="s2">&quot;D&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_isattribute</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if data is a single number or an array.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : object</span>
+<span class="sd">        The object to be checked.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool</span>
+<span class="sd">        True if the data is a single number, False if it is an iterable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+
+<div class="viewcode-block" id="write"><a class="viewcode-back" href="../../api.html#stingray.io.write">[docs]</a><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">format_</span><span class="o">=</span><span class="s1">&#39;pickle&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pickle a class instance. For parameters depending on</span>
+<span class="sd">    ``format_``, see individual function definitions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    object: a class instance</span>
+<span class="sd">        The object to be stored</span>
+
+<span class="sd">    filename: str</span>
+<span class="sd">        The name of the file to be created</span>
+
+<span class="sd">    format_: str</span>
+<span class="sd">        The format in which to store file. Formats supported</span>
+<span class="sd">        are ``pickle``, ``hdf5``, ``ascii`` or ``fits``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;pickle&#39;</span><span class="p">:</span>
+        <span class="n">_save_pickle_object</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;hdf5&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_H5PY_INSTALLED</span><span class="p">:</span>
+            <span class="n">_save_hdf5_object</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">utils</span><span class="o">.</span><span class="n">simon</span><span class="p">(</span><span class="s1">&#39;h5py not installed, using pickle instead&#39;</span>
+                        <span class="s1">&#39;to save object.&#39;</span><span class="p">)</span>
+            <span class="n">_save_pickle_object</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>
+                                <span class="s1">&#39;.pickle&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;ascii&#39;</span><span class="p">:</span>
+        <span class="n">_save_ascii_object</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;fits&#39;</span><span class="p">:</span>
+        <span class="n">_save_fits_object</span><span class="p">(</span><span class="n">input_</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">simon</span><span class="p">(</span><span class="s1">&#39;Format not understood.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="read"><a class="viewcode-back" href="../../api.html#stingray.io.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">format_</span><span class="o">=</span><span class="s1">&#39;pickle&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a saved class instance.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: str</span>
+<span class="sd">        The name of the file to be retrieved.</span>
+
+<span class="sd">    format_: str</span>
+<span class="sd">        The format used to store file. Supported formats are</span>
+<span class="sd">        pickle, hdf5, ascii or fits.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    data : {``object`` | ``astropy.table`` | ``dict``}</span>
+
+<span class="sd">        * If ``format_`` is ``pickle``, an object is returned.</span>
+<span class="sd">        * If ``format_`` is ``ascii``, `astropy.table` object is returned.</span>
+<span class="sd">        * If ``format_`` is ``hdf5`` or &#39;fits``, a dictionary object is returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;pickle&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_retrieve_pickle_object</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;hdf5&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_H5PY_INSTALLED</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_retrieve_hdf5_object</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">utils</span><span class="o">.</span><span class="n">simon</span><span class="p">(</span><span class="s1">&#39;h5py not installed, cannot read an&#39;</span>
+                        <span class="s1">&#39;hdf5 object.&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;ascii&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_retrieve_ascii_object</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">format_</span> <span class="o">==</span> <span class="s1">&#39;fits&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_retrieve_fits_object</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">simon</span><span class="p">(</span><span class="s1">&#39;Format not understood.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="savefig"><a class="viewcode-back" href="../../api.html#stingray.io.savefig">[docs]</a><span class="k">def</span> <span class="nf">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save a figure plotted by ``matplotlib``.</span>
+
+<span class="sd">    Note : This function is supposed to be used after the ``plot``</span>
+<span class="sd">    function. Otherwise it will save a blank image with no plot.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        The name of the image file. Extension must be specified in the</span>
+<span class="sd">        file name. For example filename with `.png` extension will give a</span>
+<span class="sd">        rasterized image while ``.pdf`` extension will give a vectorized</span>
+<span class="sd">        output.</span>
+
+<span class="sd">    kwargs : keyword arguments</span>
+<span class="sd">        Keyword arguments to be passed to ``savefig`` function of</span>
+<span class="sd">        ``matplotlib.pyplot``. For example use `bbox_inches=&#39;tight&#39;` to</span>
+<span class="sd">        remove the undesirable whitepace around the image.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Matplotlib required for savefig()&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">plt</span><span class="o">.</span><span class="n">fignum_exists</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">utils</span><span class="o">.</span><span class="n">simon</span><span class="p">(</span><span class="s2">&quot;use ``plot`` function to plot the image first and &quot;</span>
+                    <span class="s2">&quot;then use ``savefig`` to save the figure.&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right"> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2021, Stingray Developers.<br/>
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.4.3. &nbsp;
+    Last built 27 Jan 2021. <br/>
+  </p>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Downloading and Installing Stingray &#8212; stingray v0.3.dev411+gc10056f</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-astropy.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "document", "processClass": "math|output_area"}})</script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <script type="text/javascript" src="_static/copybutton.js"></script>
+    <link rel="shortcut icon" href="_static/astropy_logo.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Core Stingray Functionality" href="core.html" />
+    <link rel="prev" title="The basics about Stingray and astrophysics clarified" href="basics.html" />
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,600' rel='stylesheet' type='text/css'/>
+
+  </head><body>
+<div class="topbar">
+  <a class="brand" title="Documentation Home" href="index.html"><span id="logotext1">Sting</span><span id="logotext2">ray</span><span id="logotext3">:docs</span></a>
+  <ul>
+    
+    <li><a class="homelink" title="Astropy Homepage" href="http://www.astropy.org"></a></li>
+    <li><a title="General Index" href="genindex.html">Index</a></li>
+    <li><a title="Module Index" href="py-modindex.html">Modules</a></li>
+    <li>
+      
+      
+<form action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+      
+    </li>
+  </ul>
+</div>
+
+<div class="related">
+    <h3>Navigation</h3>
+    <ul>
+      <li class="right">
+	<a href="core.html" title="Core Stingray Functionality">
+	  next &raquo;
+	</a>
+      </li>
+      <li class="right">
+	<a href="basics.html" title="The basics about Stingray and astrophysics clarified">
+	  &laquo; previous
+	</a>
+	 |
+      </li>
+      <li>
+	<a href="index.html">stingray v0.3.dev411+gc10056f</a>
+	 &#187;
+      </li>
+      
+      <li>Downloading and Installing Stingray</li> 
+    </ul>
+</div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="downloading-and-installing-stingray">
+<h1>Downloading and Installing Stingray<a class="headerlink" href="#downloading-and-installing-stingray" title="Permalink to this headline">¶</a></h1>
+<p>There are currently two ways to install Stingray:</p>
+<ul class="simple">
+<li><p>via <code class="docutils literal notranslate"><span class="pre">conda</span></code></p></li>
+<li><p>via <code class="docutils literal notranslate"><span class="pre">pip</span></code></p></li>
+<li><p>from source</p></li>
+</ul>
+<div class="section" id="installing-via-conda">
+<h2>Installing via <code class="docutils literal notranslate"><span class="pre">conda</span></code><a class="headerlink" href="#installing-via-conda" title="Permalink to this headline">¶</a></h2>
+<p>If you manage your Python installation and packages
+via Anaconda or miniconda, you can install <code class="docutils literal notranslate"><span class="pre">stingray</span></code>
+via the <code class="docutils literal notranslate"><span class="pre">conda-forge</span></code> build:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ conda install -c conda-forge stingray
+</pre></div>
+</div>
+<p>That should be all you need to do! Just remember to <a class="reference internal" href="#testsuite"><span class="std std-ref">run the tests</span></a> before
+you use it!</p>
+</div>
+<div class="section" id="installing-via-pip">
+<h2>Installing via <code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#installing-via-pip" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span></code>-installing Stingray is easy! Just do:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install stingray
+</pre></div>
+</div>
+<p>And you should be done! Just remember to <a class="reference internal" href="#testsuite"><span class="std std-ref">run the tests</span></a> before you use it!</p>
+</div>
+<div class="section" id="installing-from-source-bleeding-edge-version">
+<h2>Installing from source (bleeding edge version)<a class="headerlink" href="#installing-from-source-bleeding-edge-version" title="Permalink to this headline">¶</a></h2>
+<p>For those of you wanting to install the bleeding-edge development version from
+source (it <em>will</em> have bugs; you’ve been warned!), first clone
+<a class="reference external" href="https://github.com/StingraySoftware/stingray">our repository</a> on GitHub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone --recursive https://github.com/StingraySoftware/stingray.git
+</pre></div>
+</div>
+<p>Now <code class="docutils literal notranslate"><span class="pre">cd</span></code> into the newly created <code class="docutils literal notranslate"><span class="pre">stingray</span></code> directory and install the necessary
+dependencies:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd stingray
+$ pip install astropy scipy matplotlib numpy pytest pytest-astropy h5py tqdm
+</pre></div>
+</div>
+<p>Finally, install <code class="docutils literal notranslate"><span class="pre">stingray</span></code> itself:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install -e &quot;.&quot;
+</pre></div>
+</div>
+</div>
+<div class="section" id="installing-development-environment-for-new-contributors">
+<h2>Installing development environment (for new contributors)<a class="headerlink" href="#installing-development-environment-for-new-contributors" title="Permalink to this headline">¶</a></h2>
+<p>For those of you wanting to contribute to the project, install the bleeding-edge development version from
+source. First fork
+<a class="reference external" href="https://github.com/StingraySoftware/stingray">our repository</a> on GitHub and clone the forked repository using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ git clone --recursive https://github.com/&lt;your github username&gt;/stingray.git
+</pre></div>
+</div>
+<p>Now, navigate to this folder and run
+the following command to add an upstream remote that’s linked to Stingray’s main repository.
+(This will be necessary when submitting PRs later.):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd stingray
+$ git remote add upstream https://github.com/StingraySoftware/stingray.git
+</pre></div>
+</div>
+<p>Now, install the necessary dependencies:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install astropy scipy matplotlib numpy pytest pytest-astropy h5py tqdm
+</pre></div>
+</div>
+<p>Finally, install <code class="docutils literal notranslate"><span class="pre">stingray</span></code> itself:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install -e &quot;.&quot;
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-suite">
+<span id="testsuite"></span><h2>Test Suite<a class="headerlink" href="#test-suite" title="Permalink to this headline">¶</a></h2>
+<p>Please be sure to run the test suite before you use the package, and please report anything
+you think might be bugs on our GitHub <a class="reference external" href="https://github.com/StingraySoftware/stingray/issues">Issues page</a>.</p>
+<p>Stingray uses <a class="reference external" href="https://doc.pytest.org/en/latest/">py.test</a> for testing. To run the tests, go into
+the <code class="docutils literal notranslate"><span class="pre">stingray</span></code> root directory and execute</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python setup.py test
+</pre></div>
+</div>
+<p>If you have installed Stingray via pip or conda, the source directory might
+not be easily accessible. Once installed, you can also run the tests using:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python -c &#39;import stingray; stingray.test()&#39;
+</pre></div>
+</div>
+<p>or from within a python interpreter:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">stingray</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stingray</span><span class="o">.</span><span class="n">test</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>The documentation including tutorials is hosted on <a class="reference external" href="https://stingray.readthedocs.io">readthedocs</a>
+The documentation uses <a class="reference external" href="http://www.sphinx-doc.org/en/stable/">sphinx</a> to build and requires a couple
+of extensions (most notably <a class="reference external" href="http://nbsphinx.readthedocs.io/en/0.3.1/">nbsphinx</a> and the
+<a class="reference external" href="https://github.com/astropy/astropy-helpers">astropy helpers</a>).</p>
+<p>You can build the API reference yourself by going into the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder within the <code class="docutils literal notranslate"><span class="pre">stingray</span></code> root
+directory and running the <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd stingray/docs
+$ make html
+</pre></div>
+</div>
+<p>If that doesn’t work on your system, you can invoke <code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code> itself from the stingray source directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ cd stingray
+$ $ sphinx-build docs docs/_build
+</pre></div>
+</div>
+<p>The documentation should be located in <code class="docutils literal notranslate"><span class="pre">stingray/docs/_build</span></code>. Try opening <code class="docutils literal notranslate"><span class="pre">./docs/_build/index.rst</span></code> from
+the stingray source directory.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3>Page Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">Downloading and Installing Stingray</a><ul>
+<li><a class="reference internal" href="#installing-via-conda">Installing via <code class="docutils literal notranslate"><span class="pre">conda</span></code></a></li>
+<li><a class="reference internal" href="#installing-via-pip">Installing via <code class="docutils literal notranslate"><span class="pre">pip</span></code></a></li>
+<li><a class="reference internal" href="#installing-from-source-bleeding-edge-version">Installing from source (bleeding edge version)</a></li>
+<li><a class="reference internal" href="#installing-development-environment-for-new-contributors">Installing development environment (for new contributors)</a></li>
+<li><a class="reference internal" href="#test-suite">Test Suite</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+<footer class="footer">
+  <p class="pull-right">
+    <a href="_sources/install.rst.txt"
+       rel="nofollow">Page Source</a> &nbsp;
+    <a href="#">Back to Top</a></p>
+  <p>
+    &copy; Copyright 2021, Stingray Developers.<br/>
+    Created using <a href="http://www.sphinx-doc.org/en/stable/">Sphinx</a> 3.4.3. &nbsp;
+    Last built 27 Jan 2021. <br/>
+  </p>
+</footer>
+  </body>
+</html>
